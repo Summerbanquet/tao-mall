@@ -43,7 +43,31 @@ git push -u origin feature/你的功能名
 # ⑥ review 通过 → 合并进 main → 删掉功能分支 → 回到①做下一个任务
 ```
 
-IDEA 对应操作：右上角分支切换菜单、左下角 Git 窗口看历史、顶部 Git 菜单做 pull/push/commit。
+### 不想敲命令？IDEA 界面三步走（新手主要看这里）
+
+先建立一个概念：**Commit = 本地存档点，Push = 把存档点上传到 GitHub**。日常就是"改代码 → Commit → Push"三步节奏。
+
+**① 提交（存档）**：按 `Ctrl+K`（或点左上角工具栏的绿色 ✔ 按钮）。
+弹窗里：左侧勾选你要提交的文件 → 下方 Commit message 框写说明（如 `feat: 商品列表接口`）→ 点 **Commit**。
+
+**② 推送（上传）**：按 `Ctrl+Shift+K`（或菜单 Git → Push）。
+弹窗确认无误 → 点 **Push**。第一次推送新分支时会让确认分支名，直接确认即可。
+
+**③ 提 PR（组员必做，直推 main 会被拒绝）**：
+推送成功后，IDEA 右下角会弹出一条带链接的提示，点开直达 GitHub 的 PR 创建页；
+没看到弹窗就打开仓库网页，通常顶部会有黄色横幅 **Compare & pull request**，点它。
+填写这个 PR 做了什么 → 点 **Create pull request** → 等仓库创建者 review 合并。
+
+其他常用入口：
+- 拉取别人的更新：`Ctrl+T`（或 Git → Pull）
+- 看提交历史：左下角 **Git** 工具窗
+- 新建/切换分支：IDEA 右上角的分支控件（或 Git 工具窗顶部）→ **New Branch** / 点某个分支 → **Checkout**
+
+### 推送被拒了？（rejected / non-fast-forward）
+
+说明远程有别人推了新代码，你的本地落后了，Git 不允许覆盖别人：
+1. 先 `git pull`（IDEA：Ctrl+T）——拉下来时如果提示冲突，按第 5 节处理；
+2. 再重新 push。就这么简单，**永远不要用 `push -f`**。
 
 ## 2. 分支命名
 
