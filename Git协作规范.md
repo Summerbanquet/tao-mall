@@ -16,7 +16,7 @@
 4. 克隆项目，然后用 IDEA 打开：
 
    ```bash
-   git clone https://github.com/Summerbanquet/campus-mall.git
+   git clone https://github.com/Summerbanquet/tao-mall.git
    ```
 
    IDEA 中 File → Open，选中项目根目录下的 `pom.xml`，点 Open as Project，等 Maven 索引跑完。
@@ -74,8 +74,8 @@ IDEA 对应操作：右上角分支切换菜单、左下角 Git 窗口看历史�
 - 禁止直接向 `main` push 代码。仓库已设分支保护，只能通过 PR 合并——这是为了防止有人把跑不起来的代码推上去坑全组。
 - 禁止 `git push -f`（强制推送会吃掉别人的提交）。
 - 不要动 `.gitignore`，它挡住了 `target/`、`.idea/`、`*.iml` 这些不该进仓库的文件。
-- 数据库密码不要写进 `application.yml` 提交，写到 `application-local.yml`（已在忽略名单里）。
-- 别改别人负责的模块目录；确实要动公共模块（`common`），先在群里说一声。
+- 数据库密码不要写进 `application.properties` 提交，写到 `application-local.properties`（已在忽略名单里）。
+- 别改别人负责的模块目录；确实要动公共模块（`tao-common`），先在群里说一声。
 
 ## 5. 冲突了怎么办
 

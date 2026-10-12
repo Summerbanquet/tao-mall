@@ -1,7 +1,10 @@
 # ---------- 编译产物 ----------
+HELP.md
 target/
-*.class
+build/
 out/
+!**/src/main/**/target/
+!**/src/test/**/target/
 
 # ---------- 日志 ----------
 logs/
@@ -9,11 +12,26 @@ logs/
 
 # ---------- IntelliJ IDEA ----------
 .idea/
+*.iws
 *.iml
 *.ipr
-*.iws
 
-# ---------- 本地/敏感配置（密码写在这些文件里，不会提交） ----------
+# ---------- Eclipse / STS（以防有组员用其他 IDE） ----------
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# ---------- VS Code ----------
+.vscode/
+
+# ---------- Maven Wrapper ----------
+.mvn/wrapper/maven-wrapper.jar
+
+# ---------- 本地/敏感配置（数据库密码写在这些文件里，不会提交） ----------
 .env
 application-local.yml
 application-local.yaml
@@ -26,4 +44,3 @@ desktop.ini
 
 # ---------- 前端模块（若没有前端可不管） ----------
 node_modules/
-dist/
