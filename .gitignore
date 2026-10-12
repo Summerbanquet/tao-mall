@@ -1,0 +1,29 @@
+# ---------- 编译产物 ----------
+target/
+*.class
+out/
+
+# ---------- 日志 ----------
+logs/
+*.log
+
+# ---------- IntelliJ IDEA ----------
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# ---------- 本地/敏感配置（密码写在这些文件里，不会提交） ----------
+.env
+application-local.yml
+application-local.yaml
+application-local.properties
+
+# ---------- 操作系统 ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- 前端模块（若没有前端可不管） ----------
+node_modules/
+dist/
