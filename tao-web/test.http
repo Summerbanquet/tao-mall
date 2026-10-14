@@ -1,0 +1,11 @@
+### 新增用户
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{"username": "zhangsan", "password": "123456", "nickname": "张三"}
+
+### 查列表
+GET http://localhost:8080/api/users
+
+### 按 id 查（id 换成上一条返回里的真实 id）
+GET http://localhost:8080/api/users/1948839727573299200
