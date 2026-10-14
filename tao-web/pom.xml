@@ -1,58 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.campustao</groupId>
-        <artifactId>campus-tao-svr</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <groupId>com.tao</groupId>
+        <artifactId>tao_svr</artifactId>
+        <version>0.0.1</version>
     </parent>
-    <artifactId>tao-web</artifactId>
-    <name>tao-web</name>
-    <description>唯一 Web 启动模块：Controller、拦截器、全局异常、配置</description>
 
+    <artifactId>tao-web</artifactId>
+    <name>启动模块</name>
     <dependencies>
-        <dependency>
-            <groupId>com.campustao</groupId>
-            <artifactId>tao-user</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.campustao</groupId>
-            <artifactId>tao-goods</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.campustao</groupId>
-            <artifactId>tao-order</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.campustao</groupId>
-            <artifactId>tao-ai</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.campustao</groupId>
-            <artifactId>tao-notify</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.campustao</groupId>
-            <artifactId>tao-admin</artifactId>
-        </dependency>
+        <!-- web启动依赖, 只在web模块引入 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+
+<!--                &lt;!&ndash; 测试依赖, 只在web模块引入 &ndash;&gt;-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-    </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+            <dependency>
+            <groupId>com.tao</groupId>
+            <artifactId>tao-user</artifactId>
+            </dependency>
+
+        <dependency>
+            <groupId>com.tao</groupId>
+            <artifactId>tao-pay</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.tao</groupId>
+            <artifactId>tao-order</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.tao</groupId>
+            <artifactId>tao-common</artifactId>
+        </dependency>
+
+
+
+
+
+    </dependencies>
 </project>

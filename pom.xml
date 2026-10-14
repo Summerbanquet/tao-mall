@@ -2,19 +2,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.18</version>
-        <relativePath/>
-    </parent>
-    <groupId>com.campustao</groupId>
-    <artifactId>campus-tao-svr</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+
+    <groupId>com.tao</groupId>
+    <artifactId>tao_svr</artifactId>
+    <version>0.0.1</version>
     <packaging>pom</packaging>
-    <name>campus-tao-svr</name>
-    <description>校园淘货平台后端（父聚合工程，只管版本不写代码）</description>
+
+    <name>校园淘</name>
+
     <modules>
+        <module>tao-user</module>
+        <module>tao-order</module>
+        <module>tao-pay</module>
         <module>tao-common</module>
         <module>tao-web</module>
         <module>tao-user</module>
@@ -24,63 +23,88 @@
         <module>tao-notify</module>
         <module>tao-admin</module>
     </modules>
+
+    <!-- POM文件全局变量配置 -->
     <properties>
-        <java.version>1.8</java.version>
-        <mybatis-plus.version>3.5.7</mybatis-plus.version>
+        <java.version>18</java.version>
+        <springboot.version>3.5.4</springboot.version>
+        <pdfbox.version>3.0.8</pdfbox.version>
+        <mysql.version>8.0.33</mysql.version>
+        <mybatis.plus.version>3.5.9</mybatis.plus.version>
+        <jwt.version>0.11.5</jwt.version>
     </properties>
 
+    <!-- 统一(面向所有子模块)依赖资源管理 -->
     <dependencyManagement>
         <dependencies>
-            <!-- 内部模块版本统一管理，子模块引用不写版本号 -->
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${springboot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
             <dependency>
                 <groupId>com.campustao</groupId>
                 <artifactId>tao-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
             <dependency>
-                <groupId>com.campustao</groupId>
+                <groupId>com.tao</groupId>
                 <artifactId>tao-user</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
             <dependency>
-                <groupId>com.campustao</groupId>
-                <artifactId>tao-goods</artifactId>
+                <groupId>com.tao</groupId>
+                <artifactId>tao-pay</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
             <dependency>
-                <groupId>com.campustao</groupId>
+                <groupId>com.tao</groupId>
                 <artifactId>tao-order</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
+            <!-- MYSQL数据库的驱动依赖 -->
             <dependency>
-                <groupId>com.campustao</groupId>
-                <artifactId>tao-ai</artifactId>
-                <version>${project.version}</version>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.campustao</groupId>
-                <artifactId>tao-notify</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.campustao</groupId>
-                <artifactId>tao-admin</artifactId>
-                <version>${project.version}</version>
-            </dependency>
+
+            <!-- MyBatis Plus SpringBoot3 依赖 -->
             <dependency>
                 <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-boot-starter</artifactId>
-                <version>${mybatis-plus.version}</version>
+                <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+                <version>${mybatis.plus.version}</version>
             </dependency>
+
+            <!-- JWT 认证 -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jwt.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jwt.version}</version>
+                <scope>runtime</scope>
+                <!-- 仅运行/测试时生效，打包到 JAR -->
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
-    <!-- 所有子模块公用的最小依赖 -->
-    <dependencies>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
-    </dependencies>
 </project>

@@ -1,13 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>com.campustao</groupId>
-        <artifactId>campus-tao-svr</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
-    </parent>
+
     <artifactId>tao-common</artifactId>
-    <name>tao-common</name>
-    <description>公共底层：统一返回结果、异常、枚举、工具类</description>
+    <name>公共模块</name>
+
+    <parent>
+        <groupId>com.tao</groupId>
+        <artifactId>tao_svr</artifactId>
+        <version>0.0.1</version>
+    </parent>
+
+    <dependencies>
+
+
+            <!-- Spring 核心工具类（DigestUtils / StringUtils 等） -->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-core</artifactId>
+            </dependency>
+
+            <!-- Jackson 注解（@JsonFormat 等，供实体类序列化控制） -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+            </dependency>
+
+            <!-- Lombok -->
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <optional>true</optional>
+            </dependency>
+
+
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <!-- MYSQL数据库的驱动依赖 -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+
+        </dependency>
+
+        <!-- MyBatis Plus 的依赖 -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+
+        </dependency>
+    </dependencies>
+
+
 </project>
