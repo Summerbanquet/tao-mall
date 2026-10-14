@@ -1,0 +1,23 @@
+### 发布商品
+POST http://localhost:8080/api/goods
+Content-Type: application/json
+
+{"userId": 2110255801544339458, "title": "iPad 9代 95新", "price": 1899.00, "description": "自用一年，无划痕"}
+
+### 商品分页（第1页每页5条）
+GET http://localhost:8080/api/goods?pageNum=1&pageSize=5
+
+### 某用户发布的在售商品（userId 换成你库里的）
+GET http://localhost:8080/api/goods/user/2110255801544339458
+
+### 下单
+POST http://localhost:8080/api/orders
+Content-Type: application/json
+
+{"goodsId": 替换, "buyerId": 替换, "sellerId": 替换, "amount": 1899.00}
+
+### 取消订单
+PUT http://localhost:8080/api/orders/替换订单id/cancel
+
+### 订单分页
+GET http://localhost:8080/api/orders?pageNum=1&pageSize=5

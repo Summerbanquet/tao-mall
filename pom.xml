@@ -16,6 +16,12 @@
         <module>tao-pay</module>
         <module>tao-common</module>
         <module>tao-web</module>
+        <module>tao-user</module>
+        <module>tao-goods</module>
+        <module>tao-order</module>
+        <module>tao-ai</module>
+        <module>tao-notify</module>
+        <module>tao-admin</module>
     </modules>
 
     <!-- POM文件全局变量配置 -->
@@ -41,7 +47,7 @@
             </dependency>
 
             <dependency>
-                <groupId>com.tao</groupId>
+                <groupId>com.campustao</groupId>
                 <artifactId>tao-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
