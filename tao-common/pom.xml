@@ -3,11 +3,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.tao</groupId>
-        <artifactId>tao-mall</artifactId>
+        <groupId>com.campustao</groupId>
+        <artifactId>campus-tao-svr</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <artifactId>tao-common</artifactId>
     <name>tao-common</name>
-    <description>通用工具类、常量、统一返回体、全局异常处理</description>
+    <description>公共底层：统一返回结果、异常、枚举、工具类</description>
 </project>
