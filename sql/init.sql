@@ -56,6 +56,67 @@ CREATE TABLE IF NOT EXISTS t_order (
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT = '订单表';
 
 -- ---------------------------------------------------------------------
--- 说明：无需手工插入账号，启动应用后调用注册接口即可创建用户：
---   POST /web/user/register  {"userName":"test01","password":"123456","phone":"13800138000","validateCode":"1234"}
+-- 商品表 goods（对应实体 com.tao.goods.entity.Goods）
+-- 注意：status 实际用法为 0-下架 / 1-在售
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS goods (
+    id          BIGINT        NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    user_id     BIGINT        NOT NULL                COMMENT '发布人ID',
+    title       VARCHAR(100)  NOT NULL                COMMENT '商品标题',
+    description TEXT                                  COMMENT '商品描述',
+    price       DECIMAL(10,2) NOT NULL                COMMENT '售价',
+    cover       VARCHAR(255)  NULL                    COMMENT '封面图URL',
+    category_id BIGINT        NULL                    COMMENT '分类ID(对应 category.id)',
+    status      TINYINT       NOT NULL DEFAULT 1      COMMENT '状态(0下架 1在售)',
+    create_time DATETIME      NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME      NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted     TINYINT       NOT NULL DEFAULT 0      COMMENT '逻辑删除(0正常 1已删除)',
+    PRIMARY KEY (id),
+    KEY idx_user_id (user_id),
+    KEY idx_category_id (category_id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT = '二手商品表';
+
+-- ---------------------------------------------------------------------
+-- 分类表 category（对应实体 com.tao.goods.entity.Category）
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS category (
+    id          BIGINT      NOT NULL AUTO_INCREMENT COMMENT '主键',
+    name        VARCHAR(50) NOT NULL                COMMENT '分类名称',
+    sort        INT         NOT NULL DEFAULT 0      COMMENT '排序(小的在前)',
+    create_time DATETIME    NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME    NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted     TINYINT     NOT NULL DEFAULT 0      COMMENT '逻辑删除(0正常 1已删除)',
+    PRIMARY KEY (id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT = '商品分类表';
+
+-- ---------------------------------------------------------------------
+-- 收藏表 collect（对应实体 com.tao.goods.entity.Collect）
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS collect (
+    id          BIGINT   NOT NULL AUTO_INCREMENT COMMENT '主键',
+    user_id     BIGINT   NOT NULL                COMMENT '用户ID',
+    goods_id    BIGINT   NOT NULL                COMMENT '商品ID',
+    create_time DATETIME NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    deleted     TINYINT  NOT NULL DEFAULT 0      COMMENT '逻辑删除(0正常 1已删除)',
+    PRIMARY KEY (id),
+    KEY idx_user_id (user_id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT = '收藏表';
+
+-- ---------------------------------------------------------------------
+-- 初始分类数据（首页分类筛选依赖此数据）
+-- ---------------------------------------------------------------------
+INSERT IGNORE INTO category (id, name, sort) VALUES
+    (1, '电子产品', 1),
+    (2, '书籍文具', 2),
+    (3, '服饰鞋包', 3),
+    (4, '生活用品', 4);
+
+-- ---------------------------------------------------------------------
+-- 初始管理员账号（密码均为 123456，仅用于本地开发/演示）
+-- 说明：无需手工插入账号，启动应用后调用注册接口即可创建普通用户：
+--   POST /web/user/register
+--   {"userName":"test01","password":"123456","name":"张三","phone":"13800138000","email":"a@b.com","validateCode":"1234"}
+-- 需要管理员时，把该用户的 type 改为 1：
+--   UPDATE t_user SET type = 1 WHERE user_name = 'test01';
 -- ---------------------------------------------------------------------
