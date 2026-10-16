@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>用户运营管理</title>
+    <link rel="stylesheet" href="https://registry.npmmirror.com/element-plus/2.7.3/files/dist/index.css">
+    <script src="https://registry.npmmirror.com/vue/3.4.27/files/dist/vue.global.prod.js"></script>
+    <script src="https://registry.npmmirror.com/element-plus/2.7.3/files/dist/index.full.min.js"></script>
+    <script src="https://registry.npmmirror.com/axios/1.7.2/files/dist/axios.min.js"></script>
+    <style>body{margin:0;background:#f5f7fa}.card{padding:16px}.toolbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}</style>
+</head>
+<body>
+<div id="app">
+    <el-card class="card">
+        <div class="toolbar">
+            <el-input v-model="query.username" placeholder="账号" clearable style="width:150px"/>
+            <el-input v-model="query.nickname" placeholder="昵称" clearable style="width:150px"/>
+            <el-input v-model="query.phone" placeholder="手机号" clearable style="width:150px"/>
+            <el-select v-model="query.status" placeholder="状态" clearable style="width:110px">
+                <el-option label="正常" :value="1"/><el-option label="停用" :value="0"/>
+            </el-select>
+            <el-button type="primary" @click="load(1)">查询</el-button>
+            <el-button @click="reset">重置</el-button>
+            <el-button type="success" @click="openAdd">新增用户</el-button>
+        </div>
+
+        <el-table :data="rows" border stripe>
+            <el-table-column prop="id" label="ID" width="180" show-overflow-tooltip/>
+            <el-table-column label="头像" width="70">
+                <template #default="{row}">
+                    <el-avatar :size="36" :src="full(row.avatar)">{{ (row.nickname||'客')[0] }}</el-avatar>
+                </template>
+            </el-table-column>
+            <el-table-column prop="username" label="账号"/>
+            <el-table-column prop="nickname" label="昵称"/>
+            <el-table-column prop="phone" label="手机号"/>
+            <el-table-column prop="creditScore" label="信用分" width="80"/>
+            <el-table-column label="状态" width="80">
+                <template #default="{row}">
+                    <el-tag :type="row.status===1?'success':'danger'">{{ row.status===1?'正常':'停用' }}</el-tag>
+                </template>
+            </el-table-column>
+            <el-table-column prop="createTime" label="创建时间" width="170"/>
+            <el-table-column label="操作" width="150">
+                <template #default="{row}">
+                    <el-button size="small" @click="openEdit(row)">编辑</el-button>
+                    <el-button size="small" type="danger" @click="del(row)">删除</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+
+        <el-pagination style="margin-top:12px;justify-content:flex-end" layout="total, prev, pager, next, sizes"
+                       :total="total" :current-page="query.pageNum" :page-size="query.pageSize"
+                       @current-change="p=>load(p)" @size-change="s=>{query.pageSize=s;load(1)}"/>
+    </el-card>
+
+    <el-dialog v-model="dialog.visible" :title="dialog.isEdit?'编辑用户':'新增用户'" width="480px">
+        <el-form :model="form" label-width="80px">
+            <el-form-item label="账号"><el-input v-model="form.username" :disabled="dialog.isEdit"/></el-form-item>
+            <el-form-item label="昵称"><el-input v-model="form.nickname"/></el-form-item>
+            <el-form-item label="手机号"><el-input v-model="form.phone"/></el-form-item>
+            <el-form-item label="状态">
+                <el-radio-group v-model="form.status">
+                    <el-radio :value="1">正常</el-radio><el-radio :value="0">停用</el-radio>
+                </el-radio-group>
+            </el-form-item>
+            <el-form-item label="头像">
+                <div style="display:flex;align-items:center;gap:12px">
+                    <el-avatar :size="56" :src="full(form.avatar)"/>
+                    <el-upload :action="BASE+'/api/file/upload'" name="file" :show-file-list="false"
+                               accept="image/*" :on-success="onAvatarUploaded">
+                        <el-button>上传头像</el-button>
+                    </el-upload>
+                </div>
+            </el-form-item>
+        </el-form>
+        <template #footer>
+            <el-button @click="dialog.visible=false">取消</el-button>
+            <el-button type="primary" @click="save">保存</el-button>
+        </template>
+    </el-dialog>
+</div>
+
+<script>
+    const {createApp, reactive, ref} = Vue;
+    const app = createApp({
+        setup() {
+            const BASE = 'http://localhost:8080';
+            const http = axios.create({baseURL: BASE});
+            const rows = ref([]), total = ref(0);
+            const query = reactive({pageNum: 1, pageSize: 10, username: '', nickname: '', phone: '', status: null});
+            const dialog = reactive({visible: false, isEdit: false});
+            const form = reactive({id: null, username: '', nickname: '', phone: '', status: 1, avatar: ''});
+
+            //头像存的是相对路径 /uploads/xx.png，显示时拼上后端地址
+            const full = p => p ? BASE + p : '';
+
+            const load = async (page = 1) => {
+                query.pageNum = page;
+                const {data: res} = await http.get('/api/users/page', {params: query});
+                if (res.code === 200) { rows.value = res.data.records; total.value = res.data.total; }
+                else ElementPlus.ElMessage.error(res.msg || '查询失败');
+            };
+            const reset = () => { query.username=''; query.nickname=''; query.phone=''; query.status=null; load(1); };
+            const openAdd = () => { Object.assign(form, {id:null,username:'',nickname:'',phone:'',status:1,avatar:''}); dialog.isEdit=false; dialog.visible=true; };
+            const openEdit = row => { Object.assign(form, row); dialog.isEdit=true; dialog.visible=true; };
+
+            //上传成功回调：返回的 /uploads/xx.png 直接存进表单，保存时随用户数据入库
+            const onAvatarUploaded = res => {
+                if (res.code === 200) { form.avatar = res.data; ElementPlus.ElMessage.success('头像上传成功'); }
+                else ElementPlus.ElMessage.error('头像上传失败');
+            };
+
+            const save = async () => {
+                const {data: res} = dialog.isEdit ? await http.put('/api/users', form)
+                    : await http.post('/api/users', form);
+                if (res.code === 200) { ElementPlus.ElMessage.success('保存成功'); dialog.visible=false; load(query.pageNum); }
+                else ElementPlus.ElMessage.error(res.msg || '保存失败');
+            };
+            const del = async row => {
+                try { await ElementPlus.ElMessageBox.confirm('确定删除用户「' + (row.nickname||row.username) + '」？', '提示', {type: 'warning'}); }
+                catch (e) { return; }   //点了取消
+                const {data: res} = await http.delete('/api/users/' + row.id);
+                if (res.code === 200) { ElementPlus.ElMessage.success('删除成功'); load(1); }
+                else ElementPlus.ElMessage.error(res.msg || '删除失败');
+            };
+
+            load(1);
+            return {BASE, rows, total, query, dialog, form, full, load, reset, openAdd, openEdit, onAvatarUploaded, save, del};
+        }
+    });
+    app.use(ElementPlus);
+    app.mount('#app');
+</script>
+</body>
+</html>
