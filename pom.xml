@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.tao</groupId>
+	<artifactId>tao_svr_mutile</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>校园掏</name>
+
+	<modules>
+		<module>tao-common</module>
+		<module>tao-user</module>
+		<module>tao-order</module>
+		<module>tao-goods</module>
+		<module>tao-web</module>
+	</modules>
+
+	<properties>
+		<!-- JDK 版本 -->
+		<java.version>18</java.version>
+		<springboot.version>3.5.4</springboot.version>
+		<mysql.version>8.0.33</mysql.version>
+		<mybatis.plus.version>3.5.9</mybatis.plus.version>
+		<jwt.version>0.12.3</jwt.version>
+
+		<!-- 编码统一 UTF-8：避免中文注释、报错信息、配置文件乱码 -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<maven.compiler.release>${java.version}</maven.compiler.release>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>${springboot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<!-- MYSQL数据库的驱动依赖 -->
+			<dependency>
+				<groupId>mysql</groupId>
+				<artifactId>mysql-connector-java</artifactId>
+				<version>${mysql.version}</version>
+			</dependency>
+			<!-- MyBatis Plus 的依赖 -->
+			<dependency>
+				<groupId>com.baomidou</groupId>
+				<artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+				<version>${mybatis.plus.version}</version>
+			</dependency>
+			<!-- MyBatis-Plus 分页插件：3.5.9 起 PaginationInnerInterceptor 独立到该模块，需单独引入 -->
+			<dependency>
+				<groupId>com.baomidou</groupId>
+				<artifactId>mybatis-plus-jsqlparser</artifactId>
+				<version>${mybatis.plus.version}</version>
+			</dependency>
+
+			<!-- JWT 认证 -->
+			<dependency>
+				<groupId>io.jsonwebtoken</groupId>
+				<artifactId>jjwt-api</artifactId>
+				<version>${jwt.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.jsonwebtoken</groupId>
+				<artifactId>jjwt-impl</artifactId>
+				<version>${jwt.version}</version>
+				<scope>runtime</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.jsonwebtoken</groupId>
+				<artifactId>jjwt-jackson</artifactId>
+				<version>${jwt.version}</version>
+				<scope>runtime</scope> <!-- 仅运行/测试时生效，打包到 JAR -->
+			</dependency>
+
+			<dependency>
+				<groupId>com.tao</groupId>
+				<artifactId>tao-common</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.tao</groupId>
+				<artifactId>tao-user</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.tao</groupId>
+				<artifactId>tao-order</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.tao</groupId>
+				<artifactId>tao-goods</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.tao</groupId>
+				<artifactId>tao-web</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<plugins>
+			<!-- 编译插件：源码按 UTF-8 读取，避免中文注释/报错信息乱码 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.13.0</version>
+				<configuration>
+					<!-- 强制使用 toolchains.xml 中登记的 JDK 18，不再依赖 JAVA_HOME -->
+					<jdkToolchain>
+						<version>18</version>
+					</jdkToolchain>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+					<release>${java.version}</release>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			<!-- 资源插件：yml / mapper xml 按 UTF-8 拷贝，避免配置文件中文乱码 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.3.1</version>
+				<configuration>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			<!-- 测试插件：测试输出 UTF-8 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.2.5</version>
+				<configuration>
+					<argLine>-Dfile.encoding=UTF-8</argLine>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

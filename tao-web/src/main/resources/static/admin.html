@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>管理后台 - 校园掏</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .tabs { display: flex; gap: 6px; border-bottom: 1px solid #eee; margin-bottom: 18px; flex-wrap: wrap; }
+        .tab { padding: 10px 18px; cursor: pointer; color: #666; border-bottom: 2px solid transparent; }
+        .tab.active { color: #ff6b35; border-bottom-color: #ff6b35; font-weight: bold; }
+        .pane { display: none; }
+        .pane.active { display: block; }
+        table.admin { width: 100%; border-collapse: collapse; font-size: 14px; }
+        table.admin th, table.admin td { padding: 10px 8px; border-bottom: 1px solid #f0f0f0; text-align: left; vertical-align: middle; }
+        table.admin th { background: #fafafa; color: #555; font-weight: normal; white-space: nowrap; }
+        table.admin tr:hover { background: #fcfcfc; }
+        table.admin img.thumb { width: 46px; height: 46px; object-fit: cover; border-radius: 4px; }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+        .tag-ok { background: #e8f8ee; color: #27ae60; }
+        .tag-off { background: #f2f2f2; color: #999; }
+        .tag-admin { background: #fff2e8; color: #ff6b35; }
+        .op { color: #ff6b35; cursor: pointer; margin-right: 10px; }
+        .op.danger { color: #e74c3c; }
+        .op:hover { text-decoration: underline; }
+        .toolbar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+        .toolbar input { flex: 1; min-width: 160px; padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .pager { display: flex; align-items: center; gap: 14px; margin-top: 16px; justify-content: center; color: #777; font-size: 14px; }
+        .pager button { padding: 6px 16px; border: 1px solid #ddd; background: #fff; border-radius: 4px; cursor: pointer; }
+        .pager button:disabled { color: #ccc; cursor: not-allowed; }
+        .empty-tip { padding: 40px; text-align: center; color: #999; }
+        .status-select { padding: 4px 6px; border: 1px solid #ddd; border-radius: 4px; }
+    </style>
+</head>
+<body>
+<div id="header" class="header"></div>
+
+<div class="container">
+    <div class="card">
+        <div class="page-title">管理后台</div>
+        <div class="tabs">
+            <span class="tab active" data-tab="user">用户管理</span>
+            <span class="tab" data-tab="goods">商品管理</span>
+            <span class="tab" data-tab="order">订单管理</span>
+            <span class="tab" data-tab="category">分类管理</span>
+        </div>
+
+        <!-- 用户管理 -->
+        <div class="pane active" id="pane-user">
+            <div class="toolbar">
+                <input id="userKeyword" placeholder="按用户名/昵称搜索">
+                <button class="btn btn-sm" onclick="loadUsers(1)">搜索</button>
+            </div>
+            <div id="userTable"></div>
+            <div class="pager">
+                <button onclick="goPage('user', -1)">上一页</button>
+                <span id="userPage"></span>
+                <button onclick="goPage('user', 1)">下一页</button>
+            </div>
+        </div>
+
+        <!-- 商品管理 -->
+        <div class="pane" id="pane-goods">
+            <div class="toolbar">
+                <input id="goodsKeyword" placeholder="按商品标题搜索">
+                <button class="btn btn-sm" onclick="loadGoods(1)">搜索</button>
+            </div>
+            <div id="goodsTable"></div>
+            <div class="pager">
+                <button onclick="goPage('goods', -1)">上一页</button>
+                <span id="goodsPage"></span>
+                <button onclick="goPage('goods', 1)">下一页</button>
+            </div>
+        </div>
+
+        <!-- 订单管理 -->
+        <div class="pane" id="pane-order">
+            <div class="toolbar">
+                <button class="btn btn-sm" onclick="loadOrders(1)">刷新</button>
+            </div>
+            <div id="orderTable"></div>
+            <div class="pager">
+                <button onclick="goPage('order', -1)">上一页</button>
+                <span id="orderPage"></span>
+                <button onclick="goPage('order', 1)">下一页</button>
+            </div>
+        </div>
+
+        <!-- 分类管理 -->
+        <div class="pane" id="pane-category">
+            <div class="toolbar">
+                <input id="catName" placeholder="分类名称" style="flex:0 0 200px">
+                <input id="catSort" type="number" placeholder="排序" style="flex:0 0 100px">
+                <button class="btn btn-sm" onclick="addCategory()">新增分类</button>
+            </div>
+            <div id="catTable"></div>
+        </div>
+    </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+    API.renderHeader('');
+
+    const PAGE_SIZE = 10;
+    const state = { user: 1, goods: 1, order: 1 };
+
+    const ORDER_STATUS = ['待付款', '已付款', '已发货', '已完成', '已取消'];
+
+    function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g,
+            c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    /** 进入页面先校验管理员身份 */
+    async function checkAdmin() {
+        if (!API.requireLogin()) return false;
+        const res = await API.get('/web/user/info');
+        if (res.code !== 200) return false;
+        if (res.data.type !== 1) {
+            document.querySelector('.container').innerHTML =
+                '<div class="card"><div class="empty-tip">无权限访问：仅管理员可进入管理后台</div></div>';
+            document.querySelector('.tabs')?.remove();
+            return false;
+        }
+        return true;
+    }
+
+    document.querySelectorAll('.tab').forEach(t => {
+        t.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+            document.querySelectorAll('.pane').forEach(x => x.classList.remove('active'));
+            t.classList.add('active');
+            document.getElementById('pane-' + t.dataset.tab).classList.add('active');
+            const key = t.dataset.tab;
+            if (key === 'user') loadUsers(state.user);
+            if (key === 'goods') loadGoods(state.goods);
+            if (key === 'order') loadOrders(state.order);
+            if (key === 'category') loadCategories();
+        });
+    });
+
+    function goPage(type, delta) {
+        const next = Math.max(1, state[type] + delta);
+        if (type === 'user') loadUsers(next);
+        if (type === 'goods') loadGoods(next);
+        if (type === 'order') loadOrders(next);
+    }
+
+    /* ================= 用户管理 ================= */
+    async function loadUsers(pageNum) {
+        state.user = pageNum || 1;
+        const kw = document.getElementById('userKeyword').value.trim();
+        const res = await API.post('/adm/user/page', {
+            pageNum: state.user, pageSize: PAGE_SIZE, userName: kw, nickName: kw
+        });
+        if (res.code !== 200) { API.toast(res.msg || '加载失败'); return; }
+        const rows = res.data.rows || [];
+        document.getElementById('userPage').textContent = `第 ${state.user} 页 / 共 ${res.data.total} 条`;
+        if (!rows.length) {
+            document.getElementById('userTable').innerHTML = '<div class="empty-tip">暂无用户</div>';
+            return;
+        }
+        document.getElementById('userTable').innerHTML = `
+            <table class="admin">
+                <tr>
+                    <th>ID</th><th>用户名</th><th>昵称</th><th>手机</th><th>邮箱</th><th>类型</th><th>状态</th><th>操作</th>
+                </tr>
+                ${rows.map(u => `
+                <tr>
+                    <td>${u.id}</td>
+                    <td>${esc(u.userName)}</td>
+                    <td>${esc(u.nickName)}</td>
+                    <td>${esc(u.phone)}</td>
+                    <td>${esc(u.email)}</td>
+                    <td>${u.type === 1 ? '<span class="tag tag-admin">管理员</span>' : '<span class="tag tag-off">普通用户</span>'}</td>
+                    <td>${u.status === 1 ? '<span class="tag tag-ok">正常</span>' : '<span class="tag tag-off">已禁用</span>'}</td>
+                    <td>
+                        <span class="op" onclick="toggleUser(${u.id}, ${u.status})">${u.status === 1 ? '禁用' : '启用'}</span>
+                        <span class="op danger" onclick="delUser(${u.id})">删除</span>
+                    </td>
+                </tr>`).join('')}
+            </table>`;
+    }
+
+    async function toggleUser(id, status) {
+        const res = await API.put('/adm/user/edit', { id: id, status: status === 1 ? 0 : 1 });
+        API.toast(res.msg || (res.code === 200 ? '操作成功' : '操作失败'));
+        if (res.code === 200) loadUsers(state.user);
+    }
+
+    async function delUser(id) {
+        if (!confirm('确定删除该用户？删除后不可恢复')) return;
+        const res = await API.del('/adm/user/dele/' + id);
+        API.toast(res.msg || '已删除');
+        if (res.code === 200) loadUsers(state.user);
+    }
+
+    /* ================= 商品管理 ================= */
+    async function loadGoods(pageNum) {
+        state.goods = pageNum || 1;
+        const kw = document.getElementById('goodsKeyword').value.trim();
+        const res = await API.post('/adm/goods/page', {
+            pageNum: state.goods, pageSize: PAGE_SIZE, title: kw
+        });
+        if (res.code !== 200) { API.toast(res.msg || '加载失败'); return; }
+        const rows = res.data.rows || [];
+        document.getElementById('goodsPage').textContent = `第 ${state.goods} 页 / 共 ${res.data.total} 条`;
+        if (!rows.length) {
+            document.getElementById('goodsTable').innerHTML = '<div class="empty-tip">暂无商品</div>';
+            return;
+        }
+        document.getElementById('goodsTable').innerHTML = `
+            <table class="admin">
+                <tr><th>ID</th><th>封面</th><th>标题</th><th>价格</th><th>发布者ID</th><th>状态</th><th>发布时间</th><th>操作</th></tr>
+                ${rows.map(g => `
+                <tr>
+                    <td>${g.id}</td>
+                    <td>${g.cover ? `<img class="thumb" src="${esc(g.cover)}">` : '<span style="color:#bbb">无图</span>'}</td>
+                    <td>${esc(g.title)}</td>
+                    <td>¥${API.money(g.price)}</td>
+                    <td>${g.userId}</td>
+                    <td>${g.status === 1 ? '<span class="tag tag-ok">在售</span>' : '<span class="tag tag-off">已下架</span>'}</td>
+                    <td>${API.time(g.createTime)}</td>
+                    <td>
+                        <span class="op" onclick="toggleGoods(${g.id}, ${g.status})">${g.status === 1 ? '下架' : '上架'}</span>
+                        <span class="op danger" onclick="delGoods(${g.id})">删除</span>
+                    </td>
+                </tr>`).join('')}
+            </table>`;
+    }
+
+    async function toggleGoods(id, status) {
+        const res = await API.put('/adm/goods/status/' + id, { status: status === 1 ? 0 : 1 });
+        API.toast(res.msg || (res.code === 200 ? '操作成功' : '操作失败'));
+        if (res.code === 200) loadGoods(state.goods);
+    }
+
+    async function delGoods(id) {
+        if (!confirm('确定删除该商品？')) return;
+        const res = await API.del('/adm/goods/dele/' + id);
+        API.toast(res.msg || '已删除');
+        if (res.code === 200) loadGoods(state.goods);
+    }
+
+    /* ================= 订单管理 ================= */
+    async function loadOrders(pageNum) {
+        state.order = pageNum || 1;
+        const res = await API.post('/adm/order/page', { pageNum: state.order, pageSize: PAGE_SIZE });
+        if (res.code !== 200) { API.toast(res.msg || '加载失败'); return; }
+        const rows = res.data.rows || [];
+        document.getElementById('orderPage').textContent = `第 ${state.order} 页 / 共 ${res.data.total} 条`;
+        if (!rows.length) {
+            document.getElementById('orderTable').innerHTML = '<div class="empty-tip">暂无订单</div>';
+            return;
+        }
+        document.getElementById('orderTable').innerHTML = `
+            <table class="admin">
+                <tr><th>订单号</th><th>商品</th><th>金额</th><th>数量</th><th>收货人</th><th>手机</th><th>状态</th><th>下单时间</th><th>操作</th></tr>
+                ${rows.map(o => `
+                <tr>
+                    <td>${esc(o.orderNo)}</td>
+                    <td>${esc(o.goodsName)}</td>
+                    <td>¥${API.money(o.totalAmount)}</td>
+                    <td>${o.quantity}</td>
+                    <td>${esc(o.receiver)}</td>
+                    <td>${esc(o.phone)}</td>
+                    <td>
+                        <select class="status-select" onchange="changeOrderStatus(${o.id}, this.value)">
+                            ${ORDER_STATUS.map((s, i) => `<option value="${i}" ${o.status === i ? 'selected' : ''}>${s}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td>${API.time(o.createTime)}</td>
+                    <td><span class="op danger" onclick="delOrder(${o.id})">删除</span></td>
+                </tr>`).join('')}
+            </table>`;
+    }
+
+    async function changeOrderStatus(id, status) {
+        const res = await API.put('/adm/order/edit', { id: id, status: Number(status) });
+        API.toast(res.msg || (res.code === 200 ? '状态已更新' : '操作失败'));
+    }
+
+    async function delOrder(id) {
+        if (!confirm('确定删除该订单？')) return;
+        const res = await API.del('/adm/order/dele/' + id);
+        API.toast(res.msg || '已删除');
+        if (res.code === 200) loadOrders(state.order);
+    }
+
+    /* ================= 分类管理 ================= */
+    async function loadCategories() {
+        const res = await API.get('/adm/category/list');
+        if (res.code !== 200) { API.toast(res.msg || '加载失败'); return; }
+        const list = res.data || [];
+        if (!list.length) {
+            document.getElementById('catTable').innerHTML = '<div class="empty-tip">暂无分类</div>';
+            return;
+        }
+        document.getElementById('catTable').innerHTML = `
+            <table class="admin">
+                <tr><th>ID</th><th>分类名称</th><th>排序</th><th>操作</th></tr>
+                ${list.map(c => `
+                <tr>
+                    <td>${c.id}</td>
+                    <td>${esc(c.name)}</td>
+                    <td>${c.sort}</td>
+                    <td><span class="op danger" onclick="delCategory(${c.id})">删除</span></td>
+                </tr>`).join('')}
+            </table>`;
+    }
+
+    async function addCategory() {
+        const name = document.getElementById('catName').value.trim();
+        const sort = document.getElementById('catSort').value;
+        if (!name) { API.toast('请输入分类名称'); return; }
+        const res = await API.post('/adm/category/add', { name: name, sort: sort ? Number(sort) : 0 });
+        API.toast(res.msg || '已新增');
+        if (res.code === 200) {
+            document.getElementById('catName').value = '';
+            document.getElementById('catSort').value = '';
+            loadCategories();
+        }
+    }
+
+    async function delCategory(id) {
+        if (!confirm('确定删除该分类？')) return;
+        const res = await API.del('/adm/category/dele/' + id);
+        API.toast(res.msg || '已删除');
+        if (res.code === 200) loadCategories();
+    }
+
+    (async function init() {
+        const ok = await checkAdmin();
+        if (ok) loadUsers(1);
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>个人资料 - 校园掏</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="header" class="header"></div>
+
+<div class="container">
+    <div class="card" style="max-width:600px;margin:0 auto">
+        <div class="page-title">个人资料</div>
+
+        <div class="form-item" style="text-align:center">
+            <div id="avatarBox" style="width:96px;height:96px;margin:0 auto 10px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;color:#bbb;overflow:hidden">
+                <img id="avatarImg" style="width:100%;height:100%;object-fit:cover;display:none">
+                <span id="avatarText">暂无头像</span>
+            </div>
+            <input type="file" id="file" accept="image/*" style="display:none">
+            <button class="btn btn-outline btn-sm" type="button" onclick="document.getElementById('file').click()">上传头像</button>
+            <div class="form-tip">支持 jpg/png/gif/webp/bmp，最大 20MB</div>
+        </div>
+
+        <div class="form-item">
+            <label>用户名</label>
+            <input id="userName" disabled style="background:#f7f7f7;color:#999">
+            <div class="form-tip">用户名注册后不可修改</div>
+        </div>
+        <div class="form-item">
+            <label>姓名</label>
+            <input id="name" placeholder="请输入真实姓名">
+        </div>
+        <div class="form-item">
+            <label>昵称</label>
+            <input id="nickName" placeholder="展示给其他用户看到的名字">
+        </div>
+        <div class="form-item">
+            <label>手机号</label>
+            <input id="phone" placeholder="请输入 11 位手机号">
+        </div>
+        <div class="form-item">
+            <label>邮箱</label>
+            <input id="email" placeholder="请输入邮箱">
+        </div>
+        <button class="btn btn-block" onclick="save()">保 存</button>
+    </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+    API.renderHeader('profile');
+    if (!API.requireLogin()) {
+        document.body.innerHTML = '';
+    }
+
+    /** 加载当前用户信息 */
+    async function loadInfo() {
+        const res = await API.get('/web/user/info');
+        if (res.code !== 200) {
+            API.toast(res.msg || '加载失败');
+            return;
+        }
+        const u = res.data;
+        document.getElementById('userName').value = u.userName || '';
+        document.getElementById('name').value = u.name || '';
+        document.getElementById('nickName').value = u.nickName || '';
+        document.getElementById('phone').value = u.phone || '';
+        document.getElementById('email').value = u.email || '';
+        renderAvatar(u.avatar);
+    }
+
+    function renderAvatar(url) {
+        if (url) {
+            const img = document.getElementById('avatarImg');
+            img.src = url;
+            img.style.display = 'block';
+            document.getElementById('avatarText').style.display = 'none';
+        }
+    }
+
+    /** 头像上传（复用通用上传接口） */
+    document.getElementById('file').addEventListener('change', async function () {
+        const f = this.files[0];
+        if (!f) return;
+        if (f.size > 20 * 1024 * 1024) {
+            API.toast('文件超过 20MB');
+            this.value = '';
+            return;
+        }
+        const fd = new FormData();
+        fd.append('file', f);
+        const resp = await fetch('/web/common/upload', {
+            method: 'POST',
+            headers: { 'Authorization': API.token },
+            body: fd
+        });
+        const data = await resp.json();
+        if (data.code !== 200) {
+            API.toast(data.msg || '上传失败');
+            return;
+        }
+        API.avatarUrl = data.data.url;
+        renderAvatar(data.data.url);
+        API.toast('头像上传成功，点保存生效');
+    });
+
+    async function save() {
+        const name = document.getElementById('name').value.trim();
+        const nickName = document.getElementById('nickName').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const email = document.getElementById('email').value.trim();
+
+        if (phone && !/^1[3-9]\d{9}$/.test(phone)) {
+            API.toast('手机号格式不正确');
+            return;
+        }
+        if (email && !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email)) {
+            API.toast('邮箱格式不正确');
+            return;
+        }
+
+        const body = { name, nickName, phone, email };
+        if (API.avatarUrl) {
+            body.avatar = API.avatarUrl;
+        }
+        const res = await API.put('/web/user/info', body);
+        if (res.code !== 200) {
+            API.toast(res.msg || '保存失败');
+            return;
+        }
+        API.toast('保存成功');
+        // 同步本地缓存的昵称
+        if (API.user && nickName) {
+            API.user.nickName = nickName;
+            localStorage.setItem('user', JSON.stringify(API.user));
+        }
+        setTimeout(() => location.reload(), 800);
+    }
+
+    loadInfo();
+</script>
+</body>
+</html>

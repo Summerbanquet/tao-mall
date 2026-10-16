@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>校园掏 - 首页</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .cat-bar { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0 4px; }
+        .cat { padding: 6px 16px; border: 1px solid #ddd; border-radius: 16px; cursor: pointer; font-size: 14px; color: #555; background: #fff; }
+        .cat:hover { border-color: #ff6b35; color: #ff6b35; }
+        .cat.active { background: #ff6b35; color: #fff; border-color: #ff6b35; }
+        .goods-tag { font-size: 12px; color: #999; margin-top: 4px; }
+    </style>
+</head>
+<body>
+<div id="header" class="header"></div>
+
+<div class="container">
+    <div class="search-bar">
+        <input id="kw" placeholder="搜索商品标题，回车查询" onkeydown="if(event.key==='Enter')load(1)">
+        <button class="btn" onclick="load(1)">搜索</button>
+    </div>
+
+    <div id="catBar" class="cat-bar"></div>
+
+    <div class="page-title" id="listTitle">在售商品</div>
+    <div id="list" class="goods-grid"></div>
+    <div id="empty" class="empty" style="display:none">该分类暂无在售商品</div>
+
+    <div class="pager">
+        <button class="btn btn-outline btn-sm" onclick="goPage(cur-1)">上一页</button>
+        <span id="pageInfo"></span>
+        <button class="btn btn-outline btn-sm" onclick="goPage(cur+1)">下一页</button>
+    </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+    API.renderHeader('index');
+
+    let cur = 1, total = 0, size = 12;
+    let curCat = null;              // 当前选中的分类ID，null 表示全部
+    const catMap = {};              // 分类ID → 分类名称
+
+    /** 加载分类并渲染筛选栏 */
+    async function loadCats() {
+        const res = await API.get('/web/category/list');
+        const list = (res.code === 200 && res.data) ? res.data : [];
+        list.forEach(c => catMap[c.id] = c.name);
+
+        const btn = (id, text) =>
+            `<span class="cat ${curCat === id ? 'active' : ''}" onclick="pickCat(${id === null ? 'null' : id})">${text}</span>`;
+
+        document.getElementById('catBar').innerHTML =
+            btn(null, '全部') + list.map(c => btn(c.id, escapeHtml(c.name))).join('');
+    }
+
+    /** 切换分类 */
+    function pickCat(id) {
+        curCat = id;
+        document.getElementById('listTitle').textContent =
+            id === null ? '在售商品' : (catMap[id] || '在售商品');
+        loadCats();
+        load(1);
+    }
+
+    async function load(page) {
+        if (page < 1) return;
+        cur = page;
+        const res = await API.post('/web/goods/page', {
+            pageNum: cur,
+            pageSize: size,
+            title: document.getElementById('kw').value.trim() || null,
+            categoryId: curCat
+        });
+        if (res.code !== 200) {
+            API.toast(res.msg || '查询失败');
+            return;
+        }
+        const data = res.data || { total: 0, rows: [] };
+        total = data.total || 0;
+        const rows = data.rows || [];
+
+        document.getElementById('empty').style.display = rows.length ? 'none' : 'block';
+        document.getElementById('list').innerHTML = rows.map(g => `
+            <div class="goods-card" onclick="location.href='detail.html?id=${g.id}'">
+                <div class="goods-cover">${API.coverHtml(g.cover, '暂无图片')}</div>
+                <div class="goods-body">
+                    <div class="goods-title">${escapeHtml(g.title)}</div>
+                    <div class="goods-price">¥ ${API.money(g.price)}</div>
+                    ${g.categoryId && catMap[g.categoryId]
+                        ? `<div class="goods-tag">${escapeHtml(catMap[g.categoryId])}</div>` : ''}
+                    <div class="goods-meta">${API.time(g.createTime)}</div>
+                </div>
+            </div>`).join('');
+
+        const pages = Math.ceil(total / size) || 1;
+        document.getElementById('pageInfo').textContent = `第 ${cur} / ${pages} 页，共 ${total} 件`;
+    }
+
+    function goPage(page) {
+        const pages = Math.ceil(total / size) || 1;
+        if (page < 1 || (total > 0 && page > pages)) return;
+        load(page);
+    }
+
+    function escapeHtml(s) {
+        return String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    (async function init() {
+        await loadCats();
+        load(1);
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.tao</groupId>
+        <artifactId>tao_svr_mutile</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>tao-web</artifactId>
+    <name>控制模块</name>
+
+    <dependencies>
+        <!-- web启动依赖，只在web模块引入 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!-- 测试依赖，只在web模块引入 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- 依赖用户模块 -->
+        <dependency>
+            <groupId>com.tao</groupId>
+            <artifactId>tao-user</artifactId>
+        </dependency>
+        <!-- 依赖订单模块 -->
+        <dependency>
+            <groupId>com.tao</groupId>
+            <artifactId>tao-order</artifactId>
+        </dependency>
+        <!-- 依赖商品模块 -->
+        <dependency>
+            <groupId>com.tao</groupId>
+            <artifactId>tao-goods</artifactId>
+        </dependency>
+        <!-- MyBatis-Plus（web 模块配置分页插件需要用到其 API，版本由父 POM 统一管理） -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+        </dependency>
+        <!-- 分页插件所在模块（PaginationInnerInterceptor 在 3.5.9 中被拆分到此） -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-jsqlparser</artifactId>
+        </dependency>
+        <!-- JWT 实现（jjwt-api 由 tao-common 传递依赖引入） -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+    </dependencies>
+
+    <!-- 打包插件，只放在web模块 -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${springboot.version}</version>
+                <configuration>
+                    <!-- spring-boot:run 时强制 JVM 使用 UTF-8，控制台中文/异常信息不乱码 -->
+                    <jvmArguments>-Dfile.encoding=UTF-8</jvmArguments>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <!-- repackage 作用：把所有依赖（包括 common、order、user）打进一个可执行 fat jar -->
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

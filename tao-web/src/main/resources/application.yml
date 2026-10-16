@@ -1,0 +1,64 @@
+# ===== 服务端口 =====
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8        # 请求/响应统一 UTF-8，接口返回的中文报错不乱码
+      enabled: true
+      force-request: true
+      force-response: true
+
+# ===== Spring 配置 =====
+spring:
+  application:
+    name: tao_svr # 应用名
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/tao?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowMultiQueries=true&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:root}
+    # 密码支持环境变量注入（生产环境设置 DB_PASSWORD 即可，默认值仅用于本地开发）
+    password: ${DB_PASSWORD:123456}
+    hikari:
+      maximum-pool-size: 12 # 最大连接数
+      idle-timeout: 30000 # 空闲超时（毫秒）
+      minimum-idle: 5 # 最小空闲连接数
+  # 文件上传大小限制
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 50MB
+  # 国际化/校验提示信息编码
+  messages:
+    encoding: UTF-8
+
+# ===== MyBatis-Plus 配置 =====
+mybatis-plus:
+  configuration:
+    # 改用 Slf4j 输出（交给 logback 管理，受 logging.charset 控制，避免 StdOutImpl 直接打到 System.out 乱码）
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: auto
+
+# ===== JWT 配置（由 com.tao.web.config.JwtConfig 注入到 TokenUtil） =====
+# 密钥支持环境变量覆盖：生产环境设置 JWT_SECRET 即可，不必改代码，也避免密钥随源码泄露
+tao:
+  jwt:
+    secret: ${JWT_SECRET:tao-svr-jwt-secret-key-2026-must-be-long-enough-32bytes}
+    expire-millis: 604800000  # 7 天
+
+# ===== 文件上传路径 =====
+file:
+  upload:
+    path: D:/tao/uploads
+
+# ===== 日志配置 =====
+logging:
+  level:
+    com.tao: debug
+  charset:
+    console: UTF-8   # 控制台日志编码
+    file: UTF-8      # 日志文件编码
+  file:
+    name: D:/tao/logs/tao.log  # 日志文件位置（异常堆栈会写在这里，方便排查）

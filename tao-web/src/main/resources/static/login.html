@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>登录 - 校园掏</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="header" class="header"></div>
+
+<div class="container">
+    <div class="card login-form">
+        <div class="page-title">用户登录</div>
+        <div class="form-item">
+            <label>用户名</label>
+            <input id="userName" placeholder="请输入用户名" autofocus>
+        </div>
+        <div class="form-item">
+            <label>密码</label>
+            <input id="password" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')login()">
+        </div>
+        <button class="btn btn-block" onclick="login()">登 录</button>
+        <div class="form-tip" style="margin-top:14px;text-align:center">
+            还没有账号？<a href="register.html" style="color:#ff6b35">立即注册</a>
+        </div>
+    </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+    API.renderHeader('');
+
+    async function login() {
+        const userName = document.getElementById('userName').value.trim();
+        const password = document.getElementById('password').value;
+        if (!userName || !password) {
+            API.toast('请输入用户名和密码');
+            return;
+        }
+        const res = await API.post('/web/user/login', { userName, password });
+        if (res.code !== 200) {
+            API.toast(res.msg || '登录失败');
+            return;
+        }
+        API.saveLogin(res);
+        API.toast('登录成功');
+        const redirect = API.param('redirect', 'index.html');
+        setTimeout(() => location.href = redirect, 600);
+    }
+</script>
+</body>
+</html>

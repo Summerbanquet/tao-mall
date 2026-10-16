@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>发布商品 - 校园掏</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="header" class="header"></div>
+
+<div class="container">
+    <div class="card" style="max-width:600px;margin:0 auto">
+        <div class="page-title">发布闲置</div>
+        <div class="form-item">
+            <label>商品标题</label>
+            <input id="title" placeholder="例如：九成新自行车">
+        </div>
+        <div class="form-item">
+            <label>商品描述</label>
+            <textarea id="description" rows="4" placeholder="介绍成色、入手渠道、转手原因等"></textarea>
+        </div>
+        <div class="form-item">
+            <label>价格（元）</label>
+            <input id="price" type="number" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-item">
+            <label>分类</label>
+            <select id="categoryId" style="padding:8px 10px;border:1px solid #ddd;border-radius:4px;width:100%">
+                <option value="">不分类</option>
+            </select>
+        </div>
+        <div class="form-item">
+            <label>封面图片</label>
+            <div style="display:flex;gap:10px;align-items:center">
+                <input id="cover" placeholder="点击右侧按钮上传">
+                <input type="file" id="file" accept="image/*" style="display:none">
+                <button class="btn btn-outline btn-sm" type="button" onclick="document.getElementById('file').click()">选择图片</button>
+            </div>
+            <div id="preview" style="margin-top:8px;display:none">
+                <img id="previewImg" style="max-width:200px;max-height:200px;border-radius:6px">
+            </div>
+            <div class="form-tip">支持 jpg/png/gif/webp/bmp，最大 20MB</div>
+        </div>
+        <button class="btn btn-block" onclick="publish()">发 布</button>
+    </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+    API.renderHeader('publish');
+    API.requireLogin();
+
+    // 加载分类下拉
+    (async function () {
+        const res = await API.get('/web/category/list');
+        const list = (res.code === 200 && res.data) ? res.data : [];
+        const sel = document.getElementById('categoryId');
+        list.forEach(c => {
+            const op = document.createElement('option');
+            op.value = c.id;
+            op.textContent = c.name;
+            sel.appendChild(op);
+        });
+    })();
+
+    // 文件选择后自动上传
+    document.getElementById('file').addEventListener('change', async function () {
+        const f = this.files[0];
+        if (!f) return;
+        if (f.size > 20 * 1024 * 1024) {
+            API.toast('文件超过 20MB');
+            this.value = '';
+            return;
+        }
+        const fd = new FormData();
+        fd.append('file', f);
+        // 走原生 fetch，不强制 Content-Type（FormData 由浏览器自动加 boundary）
+        const resp = await fetch('/web/common/upload', {
+            method: 'POST',
+            headers: { 'Authorization': API.token },
+            body: fd
+        });
+        const data = await resp.json();
+        if (data.code !== 200) {
+            API.toast(data.msg || '上传失败');
+            return;
+        }
+        document.getElementById('cover').value = data.data.url;
+        document.getElementById('previewImg').src = data.data.url;
+        document.getElementById('preview').style.display = 'block';
+        API.toast('上传成功');
+    });
+
+    async function publish() {
+        const title = document.getElementById('title').value.trim();
+        const description = document.getElementById('description').value.trim();
+        const price = document.getElementById('price').value;
+        const cover = document.getElementById('cover').value.trim();
+        const categoryId = document.getElementById('categoryId').value;
+
+        if (!title) {
+            API.toast('请输入商品标题');
+            return;
+        }
+        if (!price) {
+            API.toast('请输入商品价格');
+            return;
+        }
+        const res = await API.post('/web/goods/add', {
+            title, description,
+            price: Number(price),
+            cover,
+            categoryId: categoryId ? Number(categoryId) : null
+        });
+        if (res.code !== 200) {
+            API.toast(res.msg || '发布失败');
+            return;
+        }
+        API.toast('发布成功');
+        setTimeout(() => location.href = 'my.html?tab=goods', 800);
+    }
+</script>
+</body>
+</html>

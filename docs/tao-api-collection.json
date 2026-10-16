@@ -1,0 +1,595 @@
+{
+  "info": {
+    "name": "校园掏 - 接口集合",
+    "description": "校园掏二手交易平台接口集合（Postman Collection v2.1，Apifox / Postman 均可直接导入）\n\n使用说明：\n1. 导入后先运行【用户 → 用户登录】，脚本会自动把返回的 token 写入集合变量 token\n2. 其余需要登录的接口已配置 Authorization: {{token}}，无需手动填写\n3. 集合变量 baseUrl 默认 http://localhost:8080，可按需修改",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "用户",
+      "item": [
+        {
+          "name": "用户登录",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"test01\",\n  \"password\": \"123456\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/web/user/login", "host": ["{{baseUrl}}"], "path": ["web", "user", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var res = pm.response.json();",
+                  "if (res.code === 200 && res.token) {",
+                  "    pm.collectionVariables.set('token', res.token);",
+                  "    console.log('token 已自动保存：' + res.token.substring(0, 20) + '...');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "用户注册",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"test02\",\n  \"password\": \"123456\",\n  \"name\": \"张三\",\n  \"nickName\": \"\",\n  \"phone\": \"13800138001\",\n  \"email\": \"zhangsan@tao.com\",\n  \"validateCode\": \"1234\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/web/user/register", "host": ["{{baseUrl}}"], "path": ["web", "user", "register"] }
+          }
+        },
+        {
+          "name": "校验用户名是否可用",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/web/user/checkUserName/test01", "host": ["{{baseUrl}}"], "path": ["web", "user", "checkUserName", "test01"] }
+          }
+        },
+        {
+          "name": "获取当前用户信息",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "{{token}}" }],
+            "url": { "raw": "{{baseUrl}}/web/user/info", "host": ["{{baseUrl}}"], "path": ["web", "user", "info"] }
+          }
+        },
+        {
+          "name": "修改个人资料",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"张三\",\n  \"nickName\": \"考研ing\",\n  \"phone\": \"13900139000\",\n  \"email\": \"new@tao.com\",\n  \"avatar\": \"\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/web/user/info", "host": ["{{baseUrl}}"], "path": ["web", "user", "info"] }
+          }
+        },
+        {
+          "name": "退出登录",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "{{token}}" }],
+            "url": { "raw": "{{baseUrl}}/web/user/logout", "host": ["{{baseUrl}}"], "path": ["web", "user", "logout"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "商品",
+      "item": [
+        {
+          "name": "商品列表（分页）",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageNum\": 1,\n  \"pageSize\": 12,\n  \"title\": \"\",\n  \"status\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/web/goods/page", "host": ["{{baseUrl}}"], "path": ["web", "goods", "page"] }
+          }
+        },
+        {
+          "name": "商品详情",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/web/goods/getInfo/1", "host": ["{{baseUrl}}"], "path": ["web", "goods", "getInfo", "1"] }
+          }
+        },
+        {
+          "name": "发布商品",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"九成新自行车\",\n  \"description\": \"毕业转让，车况良好\",\n  \"price\": 199.90,\n  \"cover\": \"\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/web/goods/add", "host": ["{{baseUrl}}"], "path": ["web", "goods", "add"] }
+          }
+        },
+        {
+          "name": "修改商品",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"title\": \"九成新自行车（已降价）\",\n  \"description\": \"毕业转让\",\n  \"price\": 150.00\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/web/goods/edit", "host": ["{{baseUrl}}"], "path": ["web", "goods", "edit"] }
+          }
+        },
+        {
+          "name": "我发布的商品",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageNum\": 1,\n  \"pageSize\": 10\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/web/goods/my", "host": ["{{baseUrl}}"], "path": ["web", "goods", "my"] }
+          }
+        },
+        {
+          "name": "上架/下架商品",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": 0\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/web/goods/status/1", "host": ["{{baseUrl}}"], "path": ["web", "goods", "status", "1"] }
+          }
+        },
+        {
+          "name": "删除商品（逻辑删除）",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "{{token}}" }],
+            "url": { "raw": "{{baseUrl}}/web/goods/dele/1", "host": ["{{baseUrl}}"], "path": ["web", "goods", "dele", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "分类",
+      "item": [
+        {
+          "name": "分类列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/web/category/list", "host": ["{{baseUrl}}"], "path": ["web", "category", "list"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "收藏",
+      "item": [
+        {
+          "name": "收藏商品",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "{{token}}" }],
+            "url": { "raw": "{{baseUrl}}/web/collect/add/1", "host": ["{{baseUrl}}"], "path": ["web", "collect", "add", "1"] }
+          }
+        },
+        {
+          "name": "取消收藏",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "{{token}}" }],
+            "url": { "raw": "{{baseUrl}}/web/collect/cancel/1", "host": ["{{baseUrl}}"], "path": ["web", "collect", "cancel", "1"] }
+          }
+        },
+        {
+          "name": "我的收藏",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "{{token}}" }],
+            "url": { "raw": "{{baseUrl}}/web/collect/my", "host": ["{{baseUrl}}"], "path": ["web", "collect", "my"] }
+          }
+        },
+        {
+          "name": "是否已收藏",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "{{token}}" }],
+            "url": { "raw": "{{baseUrl}}/web/collect/check/1", "host": ["{{baseUrl}}"], "path": ["web", "collect", "check", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "订单",
+      "item": [
+        {
+          "name": "提交订单",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goodsName\": \"九成新自行车\",\n  \"goodsPrice\": 199.90,\n  \"quantity\": 1,\n  \"receiver\": \"张三\",\n  \"phone\": \"13800138000\",\n  \"address\": \"xx大学3号宿舍楼\",\n  \"remark\": \"\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/web/order/add", "host": ["{{baseUrl}}"], "path": ["web", "order", "add"] }
+          }
+        },
+        {
+          "name": "我的订单（分页）",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageNum\": 1,\n  \"pageSize\": 10\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/web/order/page", "host": ["{{baseUrl}}"], "path": ["web", "order", "page"] }
+          }
+        },
+        {
+          "name": "订单详情",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "{{token}}" }],
+            "url": { "raw": "{{baseUrl}}/web/order/getInfo/1", "host": ["{{baseUrl}}"], "path": ["web", "order", "getInfo", "1"] }
+          }
+        },
+        {
+          "name": "取消订单",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "{{token}}" }],
+            "url": { "raw": "{{baseUrl}}/web/order/cancel/1", "host": ["{{baseUrl}}"], "path": ["web", "order", "cancel", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "上传",
+      "item": [
+        {
+          "name": "上传图片（头像/商品封面）",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "{{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": [], "description": "选择本地图片（jpg/png/gif/webp/bmp，≤20MB）" }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/web/common/upload", "host": ["{{baseUrl}}"], "path": ["web", "common", "upload"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "管理端-用户",
+      "item": [
+        {
+          "name": "用户分页（密码已脱敏）",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageNum\": 1,\n  \"pageSize\": 10\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/adm/user/page", "host": ["{{baseUrl}}"], "path": ["adm", "user", "page"] }
+          }
+        },
+        {
+          "name": "用户详情",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "{{token}}" }],
+            "url": { "raw": "{{baseUrl}}/adm/user/getInfo/1", "host": ["{{baseUrl}}"], "path": ["adm", "user", "getInfo", "1"] }
+          }
+        },
+        {
+          "name": "新增用户",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"newuser\",\n  \"password\": \"123456\",\n  \"nickName\": \"新用户\",\n  \"phone\": \"13700137000\",\n  \"email\": \"new@tao.com\",\n  \"type\": 2,\n  \"status\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/adm/user/add", "host": ["{{baseUrl}}"], "path": ["adm", "user", "add"] }
+          }
+        },
+        {
+          "name": "修改用户",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"nickName\": \"新昵称\",\n  \"phone\": \"13800138000\",\n  \"status\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/adm/user/edit", "host": ["{{baseUrl}}"], "path": ["adm", "user", "edit"] }
+          }
+        },
+        {
+          "name": "删除用户（单个）",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "{{token}}" }],
+            "url": { "raw": "{{baseUrl}}/adm/user/dele/1", "host": ["{{baseUrl}}"], "path": ["adm", "user", "dele", "1"] }
+          }
+        },
+        {
+          "name": "批量删除用户",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[1, 2]",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/adm/user/deles", "host": ["{{baseUrl}}"], "path": ["adm", "user", "deles"] }
+          }
+        },
+        {
+          "name": "查询运营人员",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/adm/user/listSystem", "host": ["{{baseUrl}}"], "path": ["adm", "user", "listSystem"] }
+          }
+        },
+        {
+          "name": "查询普通用户",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": 2\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/adm/user/listUser", "host": ["{{baseUrl}}"], "path": ["adm", "user", "listUser"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "管理端-商品",
+      "item": [
+        {
+          "name": "商品分页（含下架）",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageNum\": 1,\n  \"pageSize\": 10,\n  \"title\": \"\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/adm/goods/page", "host": ["{{baseUrl}}"], "path": ["adm", "goods", "page"] }
+          }
+        },
+        {
+          "name": "商品详情",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "{{token}}" }],
+            "url": { "raw": "{{baseUrl}}/adm/goods/getInfo/1", "host": ["{{baseUrl}}"], "path": ["adm", "goods", "getInfo", "1"] }
+          }
+        },
+        {
+          "name": "上架/下架商品",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/adm/goods/status/1", "host": ["{{baseUrl}}"], "path": ["adm", "goods", "status", "1"] }
+          }
+        },
+        {
+          "name": "删除商品",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "{{token}}" }],
+            "url": { "raw": "{{baseUrl}}/adm/goods/dele/1", "host": ["{{baseUrl}}"], "path": ["adm", "goods", "dele", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "管理端-订单",
+      "item": [
+        {
+          "name": "订单分页",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageNum\": 1,\n  \"pageSize\": 10\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/adm/order/page", "host": ["{{baseUrl}}"], "path": ["adm", "order", "page"] }
+          }
+        },
+        {
+          "name": "订单详情",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "{{token}}" }],
+            "url": { "raw": "{{baseUrl}}/adm/order/getInfo/1", "host": ["{{baseUrl}}"], "path": ["adm", "order", "getInfo", "1"] }
+          }
+        },
+        {
+          "name": "修改订单",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"status\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/adm/order/edit", "host": ["{{baseUrl}}"], "path": ["adm", "order", "edit"] }
+          }
+        },
+        {
+          "name": "删除订单",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "{{token}}" }],
+            "url": { "raw": "{{baseUrl}}/adm/order/dele/1", "host": ["{{baseUrl}}"], "path": ["adm", "order", "dele", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "管理端-分类",
+      "item": [
+        {
+          "name": "分类列表",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "{{token}}" }],
+            "url": { "raw": "{{baseUrl}}/adm/category/list", "host": ["{{baseUrl}}"], "path": ["adm", "category", "list"] }
+          }
+        },
+        {
+          "name": "新增分类",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"数码配件\",\n  \"sort\": 5\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/adm/category/add", "host": ["{{baseUrl}}"], "path": ["adm", "category", "add"] }
+          }
+        },
+        {
+          "name": "修改分类",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "{{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"name\": \"电子数码\",\n  \"sort\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/adm/category/edit", "host": ["{{baseUrl}}"], "path": ["adm", "category", "edit"] }
+          }
+        },
+        {
+          "name": "删除分类",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "{{token}}" }],
+            "url": { "raw": "{{baseUrl}}/adm/category/dele/1", "host": ["{{baseUrl}}"], "path": ["adm", "category", "dele", "1"] }
+          }
+        }
+      ]
+    }
+  ]
+}

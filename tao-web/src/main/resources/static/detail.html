@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>商品详情 - 校园掏</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="header" class="header"></div>
+
+<div class="container">
+    <div class="card">
+        <div class="detail-wrap">
+            <div class="detail-img" id="cover"></div>
+            <div class="detail-info">
+                <h2 id="title"></h2>
+                <div class="detail-price" id="price"></div>
+                <div id="status"></div>
+                <div class="detail-desc" id="desc"></div>
+                <div class="goods-meta" id="meta"></div>
+                <div style="margin-top:16px">
+                    <button class="btn" id="collectBtn" onclick="toggleCollect()">收藏</button>
+                    <a class="btn btn-outline" href="index.html" style="margin-left:8px">返回首页</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" id="orderBox">
+        <div class="page-title">立即下单</div>
+        <div class="form-item">
+            <label>购买数量</label>
+            <input id="qty" type="number" value="1" min="1">
+        </div>
+        <div class="form-item">
+            <label>收货人</label>
+            <input id="receiver" placeholder="请输入收货人姓名">
+        </div>
+        <div class="form-item">
+            <label>联系电话</label>
+            <input id="phone" placeholder="请输入手机号">
+        </div>
+        <div class="form-item">
+            <label>收货地址</label>
+            <input id="address" placeholder="请输入收货地址">
+        </div>
+        <div class="form-item">
+            <label>备注</label>
+            <input id="remark" placeholder="选填">
+        </div>
+        <button class="btn" onclick="submitOrder()">提交订单</button>
+    </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+    API.renderHeader('');
+    const id = API.param('id', '');
+    let goods = null, collected = false;
+
+    async function loadDetail() {
+        const res = await API.get('/web/goods/getInfo/' + id);
+        if (res.code !== 200) {
+            API.toast(res.msg || '商品不存在');
+            setTimeout(() => location.href = 'index.html', 1200);
+            return;
+        }
+        goods = res.data;
+        document.title = goods.title + ' - 校园掏';
+        document.getElementById('cover').innerHTML = API.coverHtml(goods.cover, '暂无图片');
+        document.getElementById('title').textContent = goods.title;
+        document.getElementById('price').textContent = '¥ ' + API.money(goods.price);
+        document.getElementById('desc').textContent = goods.description || '（卖家没有填写描述）';
+        document.getElementById('status').innerHTML = goods.status === 1
+            ? '<span class="tag">在售</span>'
+            : '<span class="tag off">已下架</span>';
+        document.getElementById('meta').textContent = '发布于 ' + API.time(goods.createTime);
+
+        if (goods.status !== 1) {
+            document.getElementById('orderBox').style.display = 'none';
+        }
+        if (API.isLogin()) {
+            const c = await API.get('/web/collect/check/' + id);
+            collected = c.code === 200 && c.data && c.data.collected;
+            renderCollectBtn();
+        }
+    }
+
+    function renderCollectBtn() {
+        document.getElementById('collectBtn').textContent = collected ? '取消收藏' : '收藏';
+    }
+
+    async function toggleCollect() {
+        if (!API.requireLogin()) return;
+        const res = collected
+            ? await API.del('/web/collect/cancel/' + id)
+            : await API.post('/web/collect/add/' + id);
+        if (res.code !== 200) {
+            API.toast(res.msg || '操作失败');
+            return;
+        }
+        collected = !collected;
+        renderCollectBtn();
+        API.toast(collected ? '已收藏' : '已取消收藏');
+    }
+
+    async function submitOrder() {
+        if (!API.requireLogin()) return;
+        const receiver = document.getElementById('receiver').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const address = document.getElementById('address').value.trim();
+        if (!receiver || !phone || !address) {
+            API.toast('请填写收货人、电话和地址');
+            return;
+        }
+        const res = await API.post('/web/order/add', {
+            goodsName: goods.title,
+            goodsPrice: goods.price,
+            quantity: Number(document.getElementById('qty').value) || 1,
+            receiver,
+            phone,
+            address,
+            remark: document.getElementById('remark').value.trim()
+        });
+        if (res.code !== 200) {
+            API.toast(res.msg || '下单失败');
+            return;
+        }
+        API.toast('下单成功');
+        setTimeout(() => location.href = 'my.html?tab=order', 800);
+    }
+
+    if (id) loadDetail();
+</script>
+</body>
+</html>
