@@ -19,7 +19,7 @@
             </div>
             <input type="file" id="file" accept="image/*" style="display:none">
             <button class="btn btn-outline btn-sm" type="button" onclick="document.getElementById('file').click()">上传头像</button>
-            <button class="btn btn-outline btn-sm" type="button" id="dlAvatar" style="display:none" onclick="API.downloadFile(API.avatarUrl, 'avatar.jpg')">下载原图</button>
+            <button class="btn btn-outline btn-sm" type="button" id="dlAvatar" style="display:none" onclick="downloadAvatar()">下载原图</button>
             <div class="form-tip">支持 jpg/png/gif/webp/bmp，最大 20MB</div>
         </div>
 
@@ -55,6 +55,8 @@
         document.body.innerHTML = '';
     }
 
+    let avatarUrl = '';
+
     /** 加载当前用户信息 */
     async function loadInfo() {
         const res = await API.get('/web/user/info');
@@ -72,12 +74,25 @@
     }
 
     function renderAvatar(url) {
+        const img = document.getElementById('avatarImg');
+        const btn = document.getElementById('dlAvatar');
         if (url) {
-            const img = document.getElementById('avatarImg');
             img.src = url;
             img.style.display = 'block';
             document.getElementById('avatarText').style.display = 'none';
+            if (btn) btn.style.display = 'inline-block';
+            avatarUrl = url;
+        } else {
+            img.style.display = 'none';
+            document.getElementById('avatarText').style.display = 'block';
+            if (btn) btn.style.display = 'none';
+            avatarUrl = '';
         }
+    }
+
+    /** 下载当前头像原图 */
+    function downloadAvatar() {
+        API.downloadFile(avatarUrl, 'avatar.jpg');
     }
 
     /** 头像上传（复用通用上传接口） */
@@ -101,7 +116,7 @@
             API.toast(data.msg || '上传失败');
             return;
         }
-        API.avatarUrl = data.data.url;
+        avatarUrl = data.data.url;
         renderAvatar(data.data.url);
         document.getElementById('dlAvatar').style.display = 'inline-block';
         API.toast('头像上传成功，点保存生效');
