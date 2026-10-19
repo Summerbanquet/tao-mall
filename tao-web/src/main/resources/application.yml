@@ -52,6 +52,7 @@ tao:
 file:
   upload:
     path: D:/tao/uploads
+    maxsize: 20480000
 
 # ===== 日志配置 =====
 logging:
