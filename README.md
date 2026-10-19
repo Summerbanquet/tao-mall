@@ -289,7 +289,65 @@ curl -X POST http://localhost:8080/web/user/login -H "Content-Type: application/
 
 ---
 
-## 十、开发说明
+## 十、团队协作：数据库如何同步
+
+### 核心原则
+
+> **同步「表结构」，不同步「数据」。**
+
+每个人的数据库都是本地环境，账号和商品数据各人自己造。反复互拷全量 SQL 会覆盖对方数据、引发主键冲突。
+
+### 三种场景对应三种做法
+
+| 场景 | 做法 |
+|---|---|
+| **新人第一次拿到项目** | 执行 `sql/init.sql`（或用项目根目录 `sync.bat` 一键完成） |
+| **别人改了表结构，我要跟上** | `git pull` 后双击 `sync.bat` |
+| **想给组员看你已有的商品数据** | 导出全量 SQL 发给他（见下） |
+
+### 我改了表结构，怎么让别人同步
+
+1. 在 `sql/migration/` 下**新建**下一个编号的脚本，例如 `002_add_order_remark.sql`
+2. 脚本必须写成**幂等**的（可重复执行不报错），参考 `001_add_goods_category_id.sql`：
+
+```sql
+SET @col_exists = (
+    SELECT COUNT(*) FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = 'tao' AND TABLE_NAME = 'goods' AND COLUMN_NAME = 'category_id'
+);
+SET @ddl = IF(@col_exists = 0,
+    'ALTER TABLE goods ADD COLUMN category_id BIGINT NULL COMMENT ''分类ID''',
+    'SELECT ''字段已存在，跳过'' AS skip_reason');
+PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+```
+
+3. `git add / commit / push`
+4. 通知组员 `git pull`，然后双击根目录的 **`sync.bat`**（或 `sync.bat 你的密码`）即可自动按序执行所有迁移
+
+> 不要修改或删除已提交的迁移脚本，别人的环境可能已经执行过了。
+
+### 临时给组员拷贝数据
+
+只想把当前数据分享给对方一次性导入时用：
+
+```bash
+mysqldump -uroot -p123456 --default-character-set=utf8mb4 --complete-insert \
+  tao t_user t_order goods category collect > tao_full.sql
+```
+
+对方导入：
+
+```bash
+mysql -uroot -p
+source D:/tao_full.sql
+```
+
+> 注意：这会让对方的数据被你的覆盖，仅用于初次演示，不要反复使用。
+> 另外商品图片在 `file.upload.path` 指定的目录（默认 `D:/tao/uploads`）里，**不在数据库中**，需要另外打包给对方。
+
+---
+
+## 十一、开发说明
 
 - 日志目录：`D:/tao/logs/tao.log`
 - 上传目录：`D:/tao/uploads/`（按日期分目录，UUID 重命名）
