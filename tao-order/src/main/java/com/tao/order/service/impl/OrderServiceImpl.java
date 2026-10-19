@@ -1,6 +1,7 @@
 package com.tao.order.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tao.common.entity.PageResult;
@@ -43,8 +44,39 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (order.getStatus() != Order.STATUS_PENDING_PAY) {
             return false;
         }
-        order.setStatus(Order.STATUS_CANCELLED);
-        order.setUpdateTime(LocalDateTime.now());
-        return baseMapper.updateById(order) > 0;
+        return baseMapper.update(null, new LambdaUpdateWrapper<Order>()
+                .eq(Order::getId, orderId)
+                .set(Order::getStatus, Order.STATUS_CANCELLED)
+                .set(Order::getUpdateTime, LocalDateTime.now())) > 0;
+    }
+
+    @Override
+    public boolean pay(Long orderId, Long userId) {
+        Order order = baseMapper.selectById(orderId);
+        if (order == null || !userId.equals(order.getUserId())) {
+            return false;
+        }
+        if (order.getStatus() != Order.STATUS_PENDING_PAY) {
+            return false;
+        }
+        return baseMapper.update(null, new LambdaUpdateWrapper<Order>()
+                .eq(Order::getId, orderId)
+                .set(Order::getStatus, Order.STATUS_PAID)
+                .set(Order::getUpdateTime, LocalDateTime.now())) > 0;
+    }
+
+    @Override
+    public boolean confirm(Long orderId, Long userId) {
+        Order order = baseMapper.selectById(orderId);
+        if (order == null || !userId.equals(order.getUserId())) {
+            return false;
+        }
+        if (order.getStatus() != Order.STATUS_SHIPPED) {
+            return false;
+        }
+        return baseMapper.update(null, new LambdaUpdateWrapper<Order>()
+                .eq(Order::getId, orderId)
+                .set(Order::getStatus, Order.STATUS_COMPLETED)
+                .set(Order::getUpdateTime, LocalDateTime.now())) > 0;
     }
 }

@@ -123,4 +123,32 @@ public class OrderWebController {
         boolean ok = orderService.cancel(id, user.getId());
         return ok ? AjaxResult.success("取消成功", true) : AjaxResult.error("取消失败，订单状态不可取消");
     }
+
+    /**
+     * 买家付款（待付款 -> 已付款）
+     */
+    @PostMapping("/pay/{id}")
+    public AjaxResult pay(@PathVariable("id") Long id, HttpServletRequest request) {
+        String userName = (String) request.getAttribute(LoginInterceptor.USER_NAME_ATTR);
+        User user = userService.getOne(new LambdaQueryWrapper<User>().eq(User::getUserName, userName));
+        if (user == null) {
+            throw new BusinessException(404, "用户不存在");
+        }
+        boolean ok = orderService.pay(id, user.getId());
+        return ok ? AjaxResult.success("付款成功", true) : AjaxResult.error("付款失败，仅待付款订单可付款");
+    }
+
+    /**
+     * 买家确认收货（已发货 -> 已完成）
+     */
+    @PostMapping("/confirm/{id}")
+    public AjaxResult confirm(@PathVariable("id") Long id, HttpServletRequest request) {
+        String userName = (String) request.getAttribute(LoginInterceptor.USER_NAME_ATTR);
+        User user = userService.getOne(new LambdaQueryWrapper<User>().eq(User::getUserName, userName));
+        if (user == null) {
+            throw new BusinessException(404, "用户不存在");
+        }
+        boolean ok = orderService.confirm(id, user.getId());
+        return ok ? AjaxResult.success("已确认收货", true) : AjaxResult.error("操作失败，仅已发货订单可确认收货");
+    }
 }

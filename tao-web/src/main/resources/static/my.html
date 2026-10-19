@@ -111,7 +111,9 @@
                     <div class="sub">收货：${o.receiver || ''} ${o.phone || ''} ${o.address || ''}</div>
                 </div>
                 <div class="list-actions">
-                    ${o.status === 0 ? `<button class="btn btn-sm" onclick="cancelOrder(${o.id})">取消订单</button>` : ''}
+                    ${o.status === 0 ? `<button class="btn btn-sm" onclick="payOrder(${o.id})">付款</button><button class="btn btn-outline btn-sm" onclick="cancelOrder(${o.id})">取消</button>` : ''}
+                    ${o.status === 1 ? `<span class="sub">等待卖家发货</span>` : ''}
+                    ${o.status === 2 ? `<button class="btn btn-sm" onclick="confirmOrder(${o.id})">确认收货</button>` : ''}
                 </div>
             </div>`).join('');
     }
@@ -166,6 +168,20 @@
         if (!confirm('确定取消该订单吗？')) return;
         const res = await API.post('/web/order/cancel/' + id);
         API.toast(res.code === 200 ? '已取消订单' : (res.msg || '操作失败'));
+        render();
+    }
+
+    async function payOrder(id) {
+        if (!confirm('确认付款该订单？')) return;
+        const res = await API.post('/web/order/pay/' + id);
+        API.toast(res.code === 200 ? '付款成功' : (res.msg || '操作失败'));
+        render();
+    }
+
+    async function confirmOrder(id) {
+        if (!confirm('确认已收到商品？')) return;
+        const res = await API.post('/web/order/confirm/' + id);
+        API.toast(res.code === 200 ? '已确认收货' : (res.msg || '操作失败'));
         render();
     }
 
