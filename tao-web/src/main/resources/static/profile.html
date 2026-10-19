@@ -19,6 +19,7 @@
             </div>
             <input type="file" id="file" accept="image/*" style="display:none">
             <button class="btn btn-outline btn-sm" type="button" onclick="document.getElementById('file').click()">上传头像</button>
+            <button class="btn btn-outline btn-sm" type="button" id="dlAvatar" style="display:none" onclick="API.downloadFile(API.avatarUrl, 'avatar.jpg')">下载原图</button>
             <div class="form-tip">支持 jpg/png/gif/webp/bmp，最大 20MB</div>
         </div>
 
@@ -102,6 +103,7 @@
         }
         API.avatarUrl = data.data.url;
         renderAvatar(data.data.url);
+        document.getElementById('dlAvatar').style.display = 'inline-block';
         API.toast('头像上传成功，点保存生效');
     });
 

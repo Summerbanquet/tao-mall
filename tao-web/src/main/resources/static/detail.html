@@ -12,6 +12,7 @@
     <div class="card">
         <div class="detail-wrap">
             <div class="detail-img" id="cover"></div>
+            <div style="margin-top:8px"><button class="btn btn-outline btn-sm" id="dlCover" style="display:none" onclick="API.downloadFile(goods.cover, 'cover.jpg')">下载图片</button></div>
             <div class="detail-info">
                 <h2 id="title"></h2>
                 <div class="detail-price" id="price"></div>
@@ -68,6 +69,7 @@
         goods = res.data;
         document.title = goods.title + ' - 校园掏';
         document.getElementById('cover').innerHTML = API.coverHtml(goods.cover, '暂无图片');
+        if (goods.cover) document.getElementById('dlCover').style.display = 'inline-block';
         document.getElementById('title').textContent = goods.title;
         document.getElementById('price').textContent = '¥ ' + API.money(goods.price);
         document.getElementById('desc').textContent = goods.description || '（卖家没有填写描述）';

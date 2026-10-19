@@ -133,6 +133,25 @@ const API = {
     /** 商品封面（无图时显示占位文字） */
     coverHtml(url, text) {
         return url ? `<img src="${url}" alt="${text || ''}">` : (text || '暂无图片');
+    },
+
+    /**
+     * 下载已上传的文件（走 /web/common/download，需登录）
+     * @param {string} url 上传返回的完整 URL，如 /uploads/xxx.jpg
+     * @param {string} [name] 下载保存的文件名
+     */
+    downloadFile(url, name) {
+        const fileName = (url || '').replace('/uploads/', '');
+        if (!fileName) {
+            this.toast('文件地址无效');
+            return;
+        }
+        const a = document.createElement('a');
+        a.href = '/web/common/download?fileName=' + encodeURIComponent(fileName);
+        if (name) a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
     }
 };
 
