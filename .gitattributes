@@ -1,2 +1,4 @@
 /mvnw text eol=lf
 *.cmd text eol=crlf
+# 批处理必须是 CRLF：LF 换行会导致 cmd 解析错乱（多行被当成命令执行）
+*.bat text eol=crlf
