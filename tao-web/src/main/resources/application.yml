@@ -30,6 +30,12 @@ spring:
   # 国际化/校验提示信息编码
   messages:
     encoding: UTF-8
+  # 静态资源不缓存，避免前端改动要反复硬刷新（部署时如有需要可删除此段）
+  web:
+    resources:
+      cache:
+        cachecontrol:
+          no-cache: true
 
 # ===== MyBatis-Plus 配置 =====
 mybatis-plus:
