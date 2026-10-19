@@ -88,6 +88,16 @@ public class Order implements Serializable {
     private String remark;
 
     /**
+     * 商品ID
+     */
+    private Long goodsId;
+
+    /**
+     * 卖家(商品发布者)用户ID
+     */
+    private Long sellerId;
+
+    /**
      * 订单状态(0待付款 1已付款 2已发货 3已完成 4已取消)
      */
     private Integer status;

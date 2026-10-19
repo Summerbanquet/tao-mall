@@ -16,6 +16,7 @@
     <div class="tabs">
         <div class="tab" data-tab="goods" onclick="switchTab('goods')">我发布的</div>
         <div class="tab" data-tab="order" onclick="switchTab('order')">我的订单</div>
+        <div class="tab" data-tab="sell" onclick="switchTab('sell')">我卖出的</div>
         <div class="tab" data-tab="collect" onclick="switchTab('collect')">我的收藏</div>
     </div>
 
@@ -62,6 +63,7 @@
 
         if (curTab === 'goods') return renderGoods(box, empty);
         if (curTab === 'order') return renderOrders(box, empty);
+        if (curTab === 'sell') return renderSells(box, empty);
         if (curTab === 'collect') return renderCollects(box, empty);
     }
 
@@ -182,6 +184,48 @@
         if (!confirm('确认已收到商品？')) return;
         const res = await API.post('/web/order/confirm/' + id);
         API.toast(res.code === 200 ? '已确认收货' : (res.msg || '操作失败'));
+        render();
+    }
+
+    /** 我卖出的订单（卖家视角） */
+    async function renderSells(box, empty) {
+        const res = await API.post('/web/order/sellPage', { pageNum: page, pageSize: 10 });
+        if (res.code !== 200) {
+            box.innerHTML = '';
+            API.toast(res.msg || '查询失败');
+            return;
+        }
+        const rows = (res.data && res.data.rows) || [];
+        empty.style.display = rows.length ? 'none' : 'block';
+        empty.textContent = '还没有卖出订单';
+        box.innerHTML = rows.map(o => `
+            <div class="list-item">
+                <div class="main">
+                    <div>${o.goodsName} × ${o.quantity}</div>
+                    <div class="sub">订单号 ${o.orderNo} · 实付 ¥ ${API.money(o.totalAmount)} · ${STATUS_TEXT[o.status] || ''} · ${API.time(o.createTime)}</div>
+                    <div class="sub">收货：${o.receiver || ''} ${o.phone || ''} ${o.address || ''}</div>
+                </div>
+                <div class="list-actions">
+                    ${o.status === 0 ? `<span class="sub">等待买家付款</span>` : ''}
+                    ${o.status === 1 ? `<button class="btn btn-sm" onclick="shipOrder(${o.id})">发货</button>` : ''}
+                    ${o.status === 2 ? `<button class="btn btn-sm" onclick="completeOrder(${o.id})">完成订单</button>` : ''}
+                    ${o.status === 3 ? `<span class="sub">交易完成</span>` : ''}
+                    ${o.status === 4 ? `<span class="sub">已取消</span>` : ''}
+                </div>
+            </div>`).join('');
+    }
+
+    async function shipOrder(id) {
+        if (!confirm('确认发货？')) return;
+        const res = await API.post('/web/order/ship/' + id);
+        API.toast(res.code === 200 ? '已发货' : (res.msg || '操作失败'));
+        render();
+    }
+
+    async function completeOrder(id) {
+        if (!confirm('确认标记订单完成？')) return;
+        const res = await API.post('/web/order/complete/' + id);
+        API.toast(res.code === 200 ? '已完成' : (res.msg || '操作失败'));
         render();
     }
 

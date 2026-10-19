@@ -7,8 +7,6 @@ import com.tao.order.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-
 import java.time.LocalDateTime;
 
 /**
@@ -45,11 +43,7 @@ public class OrderAdmController {
         if (order.getId() == null || order.getStatus() == null) {
             return AjaxResult.error("参数不完整");
         }
-        boolean ok = orderService.update(
-                new LambdaUpdateWrapper<Order>()
-                        .eq(Order::getId, order.getId())
-                        .set(Order::getStatus, order.getStatus())
-                        .set(Order::getUpdateTime, LocalDateTime.now()));
+        boolean ok = orderService.updateStatusById(order.getId(), order.getStatus());
         return ok ? AjaxResult.success("修改成功", true) : AjaxResult.error("修改失败", false);
     }
 

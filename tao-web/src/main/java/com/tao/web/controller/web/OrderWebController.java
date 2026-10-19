@@ -3,6 +3,8 @@ package com.tao.web.controller.web;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.tao.common.entity.AjaxResult;
 import com.tao.common.entity.PageResult;
+import com.tao.goods.entity.Goods;
+import com.tao.goods.service.GoodsService;
 import com.tao.order.entity.Order;
 import com.tao.order.entity.query.OrderQuery;
 import com.tao.order.service.OrderService;
@@ -16,13 +18,12 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * 订单前端控制器：用户下单、查询我的订单、取消订单
+ * 订单前端控制器：用户下单、查询我的订单、取消订单、卖家发货
  */
 @RestController
 @RequestMapping("/web/order")
@@ -33,6 +34,9 @@ public class OrderWebController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private GoodsService goodsService;
 
     /**
      * 用户下单
@@ -48,20 +52,26 @@ public class OrderWebController {
         if (user == null) {
             throw new BusinessException(404, "用户不存在");
         }
-        if (form.getGoodsName() == null || form.getGoodsPrice() == null) {
-            return AjaxResult.error("商品信息不完整");
+        if (form.getGoodsId() == null) {
+            return AjaxResult.error("缺少商品ID");
+        }
+        Goods goods = goodsService.getById(form.getGoodsId());
+        if (goods == null) {
+            return AjaxResult.error("商品不存在");
         }
         int qty = form.getQuantity() == null ? 1 : form.getQuantity();
-        BigDecimal total = form.getGoodsPrice().multiply(new BigDecimal(qty));
+        BigDecimal total = goods.getPrice().multiply(new BigDecimal(qty));
 
         Order order = new Order();
         order.setOrderNo("OD" + System.currentTimeMillis() + UUID.randomUUID().toString().substring(0, 4).toUpperCase());
         order.setUserId(user.getId());
         order.setUserName(user.getUserName());
-        order.setGoodsName(form.getGoodsName());
-        order.setGoodsPrice(form.getGoodsPrice());
+        order.setGoodsId(goods.getId());
+        order.setGoodsName(goods.getTitle());
+        order.setGoodsPrice(goods.getPrice());
         order.setQuantity(qty);
         order.setTotalAmount(total);
+        order.setSellerId(goods.getUserId());
         order.setReceiver(form.getReceiver());
         order.setPhone(form.getPhone());
         order.setAddress(form.getAddress());
@@ -150,5 +160,55 @@ public class OrderWebController {
         }
         boolean ok = orderService.confirm(id, user.getId());
         return ok ? AjaxResult.success("已确认收货", true) : AjaxResult.error("操作失败，仅已发货订单可确认收货");
+    }
+
+    /**
+     * 卖家查看自己卖出的订单
+     */
+    @PostMapping("/sellPage")
+    public AjaxResult sellPage(@RequestBody OrderQuery query, HttpServletRequest request) {
+        String userName = (String) request.getAttribute(LoginInterceptor.USER_NAME_ATTR);
+        if (userName == null) {
+            throw new BusinessException(401, "未登录");
+        }
+        User user = userService.getOne(new LambdaQueryWrapper<User>().eq(User::getUserName, userName));
+        if (user == null) {
+            throw new BusinessException(404, "用户不存在");
+        }
+        return AjaxResult.success(orderService.sellPage(query, user.getId()));
+    }
+
+    /**
+     * 卖家发货（已付款 -> 已发货）
+     */
+    @PostMapping("/ship/{id}")
+    public AjaxResult ship(@PathVariable("id") Long id, HttpServletRequest request) {
+        String userName = (String) request.getAttribute(LoginInterceptor.USER_NAME_ATTR);
+        if (userName == null) {
+            throw new BusinessException(401, "未登录");
+        }
+        User user = userService.getOne(new LambdaQueryWrapper<User>().eq(User::getUserName, userName));
+        if (user == null) {
+            throw new BusinessException(404, "用户不存在");
+        }
+        boolean ok = orderService.ship(id, user.getId());
+        return ok ? AjaxResult.success("已发货", true) : AjaxResult.error("发货失败，仅已付款订单可发货");
+    }
+
+    /**
+     * 卖家标记完成（已发货 -> 已完成）
+     */
+    @PostMapping("/complete/{id}")
+    public AjaxResult complete(@PathVariable("id") Long id, HttpServletRequest request) {
+        String userName = (String) request.getAttribute(LoginInterceptor.USER_NAME_ATTR);
+        if (userName == null) {
+            throw new BusinessException(401, "未登录");
+        }
+        User user = userService.getOne(new LambdaQueryWrapper<User>().eq(User::getUserName, userName));
+        if (user == null) {
+            throw new BusinessException(404, "用户不存在");
+        }
+        boolean ok = orderService.complete(id, user.getId());
+        return ok ? AjaxResult.success("已完成", true) : AjaxResult.error("操作失败，仅已发货订单可完成");
     }
 }

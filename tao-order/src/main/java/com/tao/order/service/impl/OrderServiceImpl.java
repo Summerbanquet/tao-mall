@@ -79,4 +79,55 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 .set(Order::getStatus, Order.STATUS_COMPLETED)
                 .set(Order::getUpdateTime, LocalDateTime.now())) > 0;
     }
+
+    @Override
+    public boolean updateStatusById(Long id, Integer status) {
+        return baseMapper.update(null, new LambdaUpdateWrapper<Order>()
+                .eq(Order::getId, id)
+                .set(Order::getStatus, status)
+                .set(Order::getUpdateTime, LocalDateTime.now())) > 0;
+    }
+
+    @Override
+    public PageResult<Order> sellPage(OrderQuery query, Long sellerId) {
+        Page<Order> pageObj = new Page<>(query.getPageNum(), query.getPageSize());
+        LambdaQueryWrapper<Order> wrapper = new LambdaQueryWrapper<Order>()
+                .eq(Order::getSellerId, sellerId)
+                .eq(query.getOrderNo() != null, Order::getOrderNo, query.getOrderNo())
+                .like(query.getGoodsName() != null, Order::getGoodsName, query.getGoodsName())
+                .eq(query.getStatus() != null, Order::getStatus, query.getStatus())
+                .orderByDesc(Order::getCreateTime);
+        Page<Order> page = baseMapper.selectPage(pageObj, wrapper);
+        return new PageResult<>(page.getTotal(), page.getRecords());
+    }
+
+    @Override
+    public boolean ship(Long orderId, Long sellerId) {
+        Order order = baseMapper.selectById(orderId);
+        if (order == null || !sellerId.equals(order.getSellerId())) {
+            return false;
+        }
+        if (order.getStatus() != Order.STATUS_PAID) {
+            return false;
+        }
+        return baseMapper.update(null, new LambdaUpdateWrapper<Order>()
+                .eq(Order::getId, orderId)
+                .set(Order::getStatus, Order.STATUS_SHIPPED)
+                .set(Order::getUpdateTime, LocalDateTime.now())) > 0;
+    }
+
+    @Override
+    public boolean complete(Long orderId, Long sellerId) {
+        Order order = baseMapper.selectById(orderId);
+        if (order == null || !sellerId.equals(order.getSellerId())) {
+            return false;
+        }
+        if (order.getStatus() != Order.STATUS_SHIPPED) {
+            return false;
+        }
+        return baseMapper.update(null, new LambdaUpdateWrapper<Order>()
+                .eq(Order::getId, orderId)
+                .set(Order::getStatus, Order.STATUS_COMPLETED)
+                .set(Order::getUpdateTime, LocalDateTime.now())) > 0;
+    }
 }
