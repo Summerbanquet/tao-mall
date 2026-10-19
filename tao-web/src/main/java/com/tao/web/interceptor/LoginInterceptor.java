@@ -24,6 +24,10 @@ public class LoginInterceptor implements HandlerInterceptor {
             return true;
         }
         String token = request.getHeader("Authorization");
+        // 兼容：文件下载走 <a> 直链时无法带自定义请求头，允许通过 query 参数携带 token
+        if (token == null || token.isEmpty()) {
+            token = request.getParameter("token");
+        }
         String userName = TokenUtil.parseToken(token);
         if (userName == null) {
             response.setStatus(401);

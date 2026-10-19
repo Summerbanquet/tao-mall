@@ -137,36 +137,25 @@ const API = {
 
     /**
      * 下载已上传的文件（走 /web/common/download，需登录）
-     * 注意：下载接口需要登录，<a> 直接跳转不会带 Authorization，
-     * 所以这里用 fetch 携带 token 取回 blob 再触发下载
+     * 下载接口需要登录，而 <a> 直链无法带自定义请求头，
+     * 因此把 token 通过 query 参数带上（拦截器已兼容从 query 取 token），
+     * 并在用户点击的手势内同步触发，避免 fetch 异步导致的“静默不下载”
      * @param {string} url 上传返回的完整 URL，如 /uploads/xxx.jpg
      * @param {string} [name] 下载保存的文件名
      */
-    async downloadFile(url, name) {
+    downloadFile(url, name) {
         const fileName = (url || '').replace('/uploads/', '');
         if (!fileName) {
             this.toast('文件地址无效');
             return;
         }
-        try {
-            const resp = await fetch('/web/common/download?fileName=' + encodeURIComponent(fileName), {
-                headers: { 'Authorization': this.token }
-            });
-            if (!resp.ok) {
-                this.toast('下载失败：' + resp.status);
-                return;
-            }
-            const blob = await resp.blob();
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = name || fileName;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(a.href);
-        } catch (e) {
-            this.toast('下载失败');
-        }
+        const a = document.createElement('a');
+        a.href = '/web/common/download?fileName=' + encodeURIComponent(fileName)
+            + '&token=' + encodeURIComponent(this.token);
+        if (name) a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
     }
 };
 
