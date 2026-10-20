@@ -49,6 +49,12 @@ public class GoodsWebController {
         if (goods == null) {
             return AjaxResult.error("商品不存在");
         }
+        if (goods.getUserId() != null) {
+            User user = userService.getById(goods.getUserId());
+            if (user != null) {
+                goods.setUserName(user.getUserName());
+            }
+        }
         return AjaxResult.success(goods);
     }
 

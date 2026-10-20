@@ -1,5 +1,6 @@
 package com.tao.goods.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -22,6 +23,10 @@ public class Goods implements Serializable {
 
     /** 发布者（用户ID） */
     private Long userId;
+
+    /** 发布人用户名（非表字段，仅用于前端展示） */
+    @TableField(exist = false)
+    private String userName;
 
     /** 商品标题 */
     private String title;
