@@ -106,20 +106,28 @@
         }
         const fd = new FormData();
         fd.append('file', f);
-        const resp = await fetch('/web/common/upload', {
-            method: 'POST',
-            headers: { 'Authorization': API.token },
-            body: fd
-        });
-        const data = await resp.json();
-        if (data.code !== 200) {
-            API.toast(data.msg || '上传失败');
-            return;
+        try {
+            const resp = await fetch('/web/common/upload', {
+                method: 'POST',
+                headers: { 'Authorization': API.token },
+                body: fd
+            });
+            const data = await resp.json();
+            console.log('[头像上传] 响应:', data);
+            if (data.code !== 200) {
+                API.toast(data.msg || '上传失败');
+                return;
+            }
+            avatarUrl = data.data.url;
+            renderAvatar(data.data.url);
+            document.getElementById('dlAvatar').style.display = 'inline-block';
+            API.toast('头像上传成功，点保存生效');
+        } catch (e) {
+            console.error('[头像上传] 出错:', e);
+            API.toast('上传请求失败，请查看控制台');
+        } finally {
+            this.value = '';
         }
-        avatarUrl = data.data.url;
-        renderAvatar(data.data.url);
-        document.getElementById('dlAvatar').style.display = 'inline-block';
-        API.toast('头像上传成功，点保存生效');
     });
 
     async function save() {
