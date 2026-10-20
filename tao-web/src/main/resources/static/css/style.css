@@ -278,6 +278,23 @@ a {
     border-radius: 8px;
 }
 
+/* 商品图片悬浮时显示“下载图片”按钮 */
+.detail-img-wrap {
+    position: relative;
+    display: inline-block;
+}
+.dl-cover-btn {
+    position: absolute;
+    left: 50%;
+    bottom: 10px;
+    transform: translateX(-50%);
+    display: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
+}
+.detail-img-wrap.has-cover:hover .dl-cover-btn {
+    display: inline-block;
+}
+
 .detail-info {
     flex: 1;
     min-width: 300px;
