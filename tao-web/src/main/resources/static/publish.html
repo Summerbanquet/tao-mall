@@ -41,7 +41,7 @@
             </div>
             <div class="form-tip">支持 jpg/png/gif/webp/bmp，最大 20MB</div>
         </div>
-        <button class="btn btn-block" onclick="publish()">发 布</button>
+        <button class="btn btn-block" onclick="submit()">发 布</button>
     </div>
 </div>
 
@@ -49,6 +49,13 @@
 <script>
     API.renderHeader('publish');
     API.requireLogin();
+
+    const editId = API.param('id');
+    const isEdit = !!editId;
+    if (isEdit) {
+        document.querySelector('.page-title').textContent = '编辑商品';
+        document.querySelector('.btn-block').textContent = '保 存';
+    }
 
     // 加载分类下拉
     (async function () {
@@ -61,6 +68,24 @@
             op.textContent = c.name;
             sel.appendChild(op);
         });
+        // 编辑模式：拉取商品信息并预填
+        if (isEdit) {
+            const r = await API.get('/web/goods/getInfo/' + editId);
+            if (r.code === 200 && r.data) {
+                const g = r.data;
+                document.getElementById('title').value = g.title || '';
+                document.getElementById('description').value = g.description || '';
+                document.getElementById('price').value = (g.price == null ? '' : g.price);
+                document.getElementById('cover').value = g.cover || '';
+                if (g.categoryId != null) sel.value = g.categoryId;
+                if (g.cover) {
+                    document.getElementById('previewImg').src = g.cover;
+                    document.getElementById('preview').style.display = 'block';
+                }
+            } else {
+                API.toast(r.msg || '加载失败');
+            }
+        }
     })();
 
     // 文件选择后自动上传
@@ -91,7 +116,7 @@
         API.toast('上传成功');
     });
 
-    async function publish() {
+    async function submit() {
         const title = document.getElementById('title').value.trim();
         const description = document.getElementById('description').value.trim();
         const price = document.getElementById('price').value;
@@ -106,17 +131,24 @@
             API.toast('请输入商品价格');
             return;
         }
-        const res = await API.post('/web/goods/add', {
+        const body = {
             title, description,
             price: Number(price),
             cover,
             categoryId: categoryId ? Number(categoryId) : null
-        });
+        };
+        let res;
+        if (isEdit) {
+            body.id = Number(editId);
+            res = await API.put('/web/goods/edit', body);
+        } else {
+            res = await API.post('/web/goods/add', body);
+        }
         if (res.code !== 200) {
-            API.toast(res.msg || '发布失败');
+            API.toast(res.msg || '操作失败');
             return;
         }
-        API.toast('发布成功');
+        API.toast(isEdit ? '保存成功' : '发布成功');
         setTimeout(() => location.href = 'my.html?tab=goods', 800);
     }
 </script>

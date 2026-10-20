@@ -91,7 +91,17 @@ public class GoodsWebController {
         if (!user.getId().equals(exist.getUserId())) {
             return AjaxResult.error("只能修改自己发布的商品");
         }
+        if (!StringUtils.hasText(goods.getTitle())) {
+            return AjaxResult.error("商品标题不能为空");
+        }
+        if (goods.getPrice() == null) {
+            return AjaxResult.error("商品价格不能为空");
+        }
+        // 保留不可由卖家修改的字段，避免被请求体置空（status 等）
         goods.setUserId(exist.getUserId());
+        goods.setStatus(exist.getStatus());
+        goods.setCreateTime(exist.getCreateTime());
+        goods.setDeleted(exist.getDeleted());
         goods.setUpdateTime(LocalDateTime.now());
         return goodsService.updateById(goods) ? AjaxResult.success("修改成功", true) : AjaxResult.error("修改失败", false);
     }

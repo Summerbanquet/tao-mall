@@ -86,6 +86,7 @@
                     <div class="sub">¥ ${API.money(g.price)} · ${g.status === 1 ? '在售' : '已下架'} · ${API.time(g.createTime)}</div>
                 </div>
                 <div class="list-actions">
+                    <button class="btn btn-outline btn-sm" onclick="location.href='publish.html?id=${g.id}'">编辑</button>
                     <button class="btn btn-outline btn-sm" onclick="toggleStatus(${g.id}, ${g.status})">
                         ${g.status === 1 ? '下架' : '上架'}
                     </button>
