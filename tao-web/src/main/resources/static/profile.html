@@ -138,8 +138,8 @@
         }
 
         const body = { name, nickName, phone, email };
-        if (API.avatarUrl) {
-            body.avatar = API.avatarUrl;
+        if (avatarUrl) {
+            body.avatar = avatarUrl;
         }
         const res = await API.put('/web/user/info', body);
         if (res.code !== 200) {
