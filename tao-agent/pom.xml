@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.tao</groupId>
+        <artifactId>tao_svr_mutile</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>tao-agent</artifactId>
+    <name>AI 代理模块</name>
+
+    <dependencies>
+        <!-- 公共模块：FileService / AjaxResult / spring-web 等 -->
+        <dependency>
+            <groupId>com.tao</groupId>
+            <artifactId>tao-common</artifactId>
+        </dependency>
+        <!-- 响应式流：AIChatService.chatStream 返回 reactor Flux<String> -->
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+        </dependency>
+        <!-- JSON 解析：调用模型接口、解析 SSE 数据 -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <!-- 业务模块：实体与 Mapper，用于客服按问题检索系统数据 -->
+        <dependency>
+            <groupId>com.tao</groupId>
+            <artifactId>tao-goods</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.tao</groupId>
+            <artifactId>tao-order</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.tao</groupId>
+            <artifactId>tao-user</artifactId>
+        </dependency>
+    </dependencies>
+</project>

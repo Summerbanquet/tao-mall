@@ -8,7 +8,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>校园掏</name>
+	<name>校园淘</name>
 
 	<modules>
 		<module>tao-common</module>
@@ -16,7 +16,8 @@
 		<module>tao-order</module>
 		<module>tao-goods</module>
 		<module>tao-web</module>
-	</modules>
+        <module>tao-agent</module>
+    </modules>
 
 	<properties>
 		<!-- JDK 版本 -->
@@ -103,6 +104,12 @@
 			<dependency>
 				<groupId>com.tao</groupId>
 				<artifactId>tao-goods</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.tao</groupId>
+				<artifactId>tao-agent</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 

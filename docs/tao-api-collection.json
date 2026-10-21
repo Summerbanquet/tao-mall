@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "校园掏 - 接口集合",
-    "description": "校园掏二手交易平台接口集合（Postman Collection v2.1，Apifox / Postman 均可直接导入）\n\n使用说明：\n1. 导入后先运行【用户 → 用户登录】，脚本会自动把返回的 token 写入集合变量 token\n2. 其余需要登录的接口已配置 Authorization: {{token}}，无需手动填写\n3. 集合变量 baseUrl 默认 http://localhost:8080，可按需修改",
+    "name": "校园淘 - 接口集合",
+    "description": "校园淘二手交易平台接口集合（Postman Collection v2.1，Apifox / Postman 均可直接导入）\n\n使用说明：\n1. 导入后先运行【用户 → 用户登录】，脚本会自动把返回的 token 写入集合变量 token\n2. 其余需要登录的接口已配置 Authorization: {{token}}，无需手动填写\n3. 集合变量 baseUrl 默认 http://localhost:8080，可按需修改",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [

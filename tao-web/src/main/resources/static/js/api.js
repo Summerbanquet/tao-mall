@@ -108,7 +108,7 @@ const API = {
 
         nav.innerHTML = `
             <div class="nav">
-                <a href="index.html" class="logo">校园掏</a>
+                <a href="index.html" class="logo">校园淘</a>
                 ${links.map(l => `<a href="${l.href}" class="${active === l.key ? 'active' : ''}">${l.text}</a>`).join('')}
                 <div class="nav-right">${right}</div>
             </div>`;

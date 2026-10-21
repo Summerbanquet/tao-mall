@@ -54,6 +54,22 @@ tao:
     secret: ${JWT_SECRET:tao-svr-jwt-secret-key-2026-must-be-long-enough-32bytes}
     expire-millis: 604800000  # 7 天
 
+  # ===== 阿里通义千问（DashScope）模型配置 =====
+  ai:
+    # API Key（生产环境用环境变量 AI_API_KEY 覆盖，不要写死在代码/配置里）
+    api-key: ${AI_API_KEY:sk-ws-H.PXDMRDM.fsrb.MEUCIQDhffWY1IA2Wkl1tIIManZC3_7CPWFq98u5JCAJoFQYIQIgOt8HUewUYdo6nFy-UWCi6JoYNYZffk56L8hhFxFVT5k}
+    chat:
+      # OpenAI 兼容对话接口，支持文本 + 图片多模态（image_url）
+      url: https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions
+      # qwen3-vl-plus：视觉模型，支持文本 + 图片理解（当前密钥已开通权限）
+      model: qwen3-vl-plus
+    image:
+      # 文生图异步任务提交接口
+      url: https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis
+      # 任务轮询接口前缀（拼接 task_id）
+      task-url: https://dashscope.aliyuncs.com/api/v1/tasks/
+      model: wanx2.1-t2i-turbo
+
 # ===== 文件上传路径 =====
 file:
   upload:

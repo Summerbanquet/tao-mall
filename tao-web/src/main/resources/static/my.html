@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>我的 - 校园掏</title>
+    <title>我的 - 校园淘</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -34,6 +34,22 @@
     }
 
     const STATUS_TEXT = ['待付款', '已付款', '已发货', '已完成', '已取消'];
+
+    function escapeHtml(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+    function newnessLabel(n) {
+        if (n == null) return '';
+        if (n >= 100) return '全新';
+        return Math.floor(n / 10) + '成新';
+    }
+    function goodsExtra(g) {
+        const parts = [];
+        const n = newnessLabel(g.newness);
+        if (n) parts.push(n);
+        if (g.tradeLocation) parts.push(escapeHtml(g.tradeLocation));
+        return parts.join(' · ');
+    }
     let curTab = API.param('tab', 'goods');
     let page = 1;
 
@@ -84,6 +100,7 @@
                 <div class="main">
                     <div>${g.title}</div>
                     <div class="sub">¥ ${API.money(g.price)} · ${g.status === 1 ? '在售' : '已下架'} · ${API.time(g.createTime)}</div>
+                    ${goodsExtra(g) ? `<div class="sub">${goodsExtra(g)}</div>` : ''}
                 </div>
                 <div class="list-actions">
                     <button class="btn btn-outline btn-sm" onclick="location.href='publish.html?id=${g.id}'">编辑</button>
@@ -147,6 +164,7 @@
                 <div class="main">
                     <div>${g.title}</div>
                     <div class="sub">¥ ${API.money(g.price)} · ${g.status === 1 ? '在售' : '已下架'}</div>
+                    ${goodsExtra(g) ? `<div class="sub">${goodsExtra(g)}</div>` : ''}
                 </div>
                 <div class="list-actions">
                     <button class="btn btn-outline btn-sm" onclick="location.href='detail.html?id=${g.id}'">查看</button>
@@ -233,5 +251,7 @@
     loadUser();
     switchTab(curTab);
 </script>
+
+<script src="js/customer-service.js"></script>
 </body>
 </html>

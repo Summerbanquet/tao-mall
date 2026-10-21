@@ -40,6 +40,11 @@
             <groupId>com.tao</groupId>
             <artifactId>tao-goods</artifactId>
         </dependency>
+        <!-- 依赖 AI 代理模块（提供 AgentWebController 等用户端 AI 接口） -->
+        <dependency>
+            <groupId>com.tao</groupId>
+            <artifactId>tao-agent</artifactId>
+        </dependency>
         <!-- MyBatis-Plus（web 模块配置分页插件需要用到其 API，版本由父 POM 统一管理） -->
         <dependency>
             <groupId>com.baomidou</groupId>

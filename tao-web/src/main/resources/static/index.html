@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>校园掏 - 首页</title>
+    <title>校园淘 - 首页</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
         .cat-bar { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0 4px; }
@@ -10,6 +10,7 @@
         .cat:hover { border-color: #ff6b35; color: #ff6b35; }
         .cat.active { background: #ff6b35; color: #fff; border-color: #ff6b35; }
         .goods-tag { font-size: 12px; color: #999; margin-top: 4px; }
+        .goods-extra { font-size: 12px; color: #888; margin-top: 4px; }
     </style>
 </head>
 <body>
@@ -90,6 +91,7 @@
                     <div class="goods-price">¥ ${API.money(g.price)}</div>
                     ${g.categoryId && catMap[g.categoryId]
                         ? `<div class="goods-tag">${escapeHtml(catMap[g.categoryId])}</div>` : ''}
+                    ${goodsExtra(g)}
                     <div class="goods-meta">${API.time(g.createTime)}</div>
                 </div>
             </div>`).join('');
@@ -108,10 +110,25 @@
         return String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
 
+    function newnessLabel(n) {
+        if (n == null) return '';
+        if (n >= 100) return '全新';
+        return Math.floor(n / 10) + '成新';
+    }
+    function goodsExtra(g) {
+        var parts = [];
+        var n = newnessLabel(g.newness);
+        if (n) parts.push(n);
+        if (g.tradeLocation) parts.push(escapeHtml(g.tradeLocation));
+        return parts.length ? '<div class="goods-extra">' + parts.join(' · ') + '</div>' : '';
+    }
+
     (async function init() {
         await loadCats();
         load(1);
     })();
 </script>
+
+<script src="js/customer-service.js"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 -- =====================================================================
--- 校园掏 初始化建表脚本
+-- 校园淘 初始化建表脚本
 -- 数据库名：tao（与 application.yml 中 jdbc:mysql://127.0.0.1:3306/tao 对应）
 -- 字符集：utf8mb4
 -- 执行方式：mysql -uroot -p123456 < sql/init.sql
@@ -67,6 +67,8 @@ CREATE TABLE IF NOT EXISTS goods (
     price       DECIMAL(10,2) NOT NULL                COMMENT '售价',
     cover       VARCHAR(255)  NULL                    COMMENT '封面图URL',
     category_id BIGINT        NULL                    COMMENT '分类ID(对应 category.id)',
+    newness      TINYINT       NULL                    COMMENT '新旧程度(100全新/90九成新/80八成新/70七成新/60六成及以下)',
+    trade_location VARCHAR(100) NULL                    COMMENT '交易地点',
     status      TINYINT       NOT NULL DEFAULT 1      COMMENT '状态(0下架 1在售)',
     create_time DATETIME      NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time DATETIME      NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',

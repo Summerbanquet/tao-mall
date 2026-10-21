@@ -51,6 +51,12 @@ public class Goods implements Serializable {
     /** 商品状态：在售 */
     public static final Integer STATUS_ON = 1;
 
+    /** 新旧程度：100=全新，90=9成新，80=8成新，70=7成新，60=6成及以下（NULL=未填写） */
+    private Integer newness;
+
+    /** 交易地点（如：图书馆门口 / 宿舍区 / 线上邮寄） */
+    private String tradeLocation;
+
     /** 创建时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")

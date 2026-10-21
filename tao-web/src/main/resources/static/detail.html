@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>商品详情 - 校园掏</title>
+    <title>商品详情 - 校园淘</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -20,6 +20,7 @@
                 <div class="detail-price" id="price"></div>
                 <div id="status"></div>
                 <div class="goods-meta" id="seller"></div>
+                <div class="goods-meta" id="extra"></div>
                 <div class="detail-desc" id="desc"></div>
                 <div class="goods-meta" id="meta"></div>
                 <div style="margin-top:16px">
@@ -62,6 +63,12 @@
     const id = API.param('id', '');
     let goods = null, collected = false;
 
+    function newnessLabel(n) {
+        if (n == null) return '';
+        if (n >= 100) return '全新';
+        return Math.floor(n / 10) + '成新';
+    }
+
     async function loadDetail() {
         const res = await API.get('/web/goods/getInfo/' + id);
         if (res.code !== 200) {
@@ -70,7 +77,7 @@
             return;
         }
         goods = res.data;
-        document.title = goods.title + ' - 校园掏';
+        document.title = goods.title + ' - 校园淘';
         document.getElementById('cover').innerHTML = API.coverHtml(goods.cover, '暂无图片');
         if (goods.cover) document.getElementById('coverWrap').classList.add('has-cover');
         document.getElementById('title').textContent = goods.title;
@@ -81,6 +88,7 @@
             : '<span class="tag off">已下架</span>';
         document.getElementById('seller').textContent = '发布人：' + (goods.userName || '未知用户');
         document.getElementById('meta').textContent = '发布于 ' + API.time(goods.createTime);
+        document.getElementById('extra').textContent = [newnessLabel(goods.newness), goods.tradeLocation].filter(Boolean).join(' · ');
 
         if (goods.status !== 1) {
             document.getElementById('orderBox').style.display = 'none';
@@ -139,5 +147,7 @@
 
     if (id) loadDetail();
 </script>
+
+<script src="js/customer-service.js"></script>
 </body>
 </html>

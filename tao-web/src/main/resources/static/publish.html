@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>发布商品 - 校园掏</title>
+    <title>发布商品 - 校园淘</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -28,6 +28,21 @@
             <select id="categoryId" style="padding:8px 10px;border:1px solid #ddd;border-radius:4px;width:100%">
                 <option value="">不分类</option>
             </select>
+        </div>
+        <div class="form-item">
+            <label>新旧程度</label>
+            <select id="newness" style="padding:8px 10px;border:1px solid #ddd;border-radius:4px;width:100%">
+                <option value="">请选择</option>
+                <option value="100">全新</option>
+                <option value="90">9成新</option>
+                <option value="80">8成新</option>
+                <option value="70">7成新</option>
+                <option value="60">6成新及以下</option>
+            </select>
+        </div>
+        <div class="form-item">
+            <label>交易地点</label>
+            <input id="tradeLocation" placeholder="例如：图书馆门口 / 宿舍区 / 线上邮寄">
         </div>
         <div class="form-item">
             <label>封面图片</label>
@@ -78,6 +93,8 @@
                 document.getElementById('price').value = (g.price == null ? '' : g.price);
                 document.getElementById('cover').value = g.cover || '';
                 if (g.categoryId != null) sel.value = g.categoryId;
+                if (g.newness != null) document.getElementById('newness').value = g.newness;
+                if (g.tradeLocation) document.getElementById('tradeLocation').value = g.tradeLocation;
                 if (g.cover) {
                     document.getElementById('previewImg').src = g.cover;
                     document.getElementById('preview').style.display = 'block';
@@ -122,6 +139,8 @@
         const price = document.getElementById('price').value;
         const cover = document.getElementById('cover').value.trim();
         const categoryId = document.getElementById('categoryId').value;
+        const newness = document.getElementById('newness').value;
+        const tradeLocation = document.getElementById('tradeLocation').value.trim();
 
         if (!title) {
             API.toast('请输入商品标题');
@@ -135,7 +154,9 @@
             title, description,
             price: Number(price),
             cover,
-            categoryId: categoryId ? Number(categoryId) : null
+            categoryId: categoryId ? Number(categoryId) : null,
+            newness: newness ? Number(newness) : null,
+            tradeLocation: tradeLocation || null
         };
         let res;
         if (isEdit) {
@@ -152,5 +173,7 @@
         setTimeout(() => location.href = 'my.html?tab=goods', 800);
     }
 </script>
+
+<script src="js/customer-service.js"></script>
 </body>
 </html>
