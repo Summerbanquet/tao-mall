@@ -99,7 +99,7 @@ tao:
 
 file:
   upload:
-    path: D:/tao/uploads                # 上传目录，需自行创建
+    path: ${FILE_UPLOAD_PATH:D:/tao/uploads}                # 上传目录，可用环境变量覆盖；Mac/Linux 设 FILE_UPLOAD_PATH=~/tao/uploads
 ```
 
 > 密码与 JWT 密钥都支持环境变量，默认值仅供本地开发。生产环境请设置 `DB_PASSWORD`、`JWT_SECRET`。
@@ -270,7 +270,7 @@ java -jar tao-web/target/tao-web-*.jar
 检查 `application.yml` 的数据库账号密码，或设置环境变量 `DB_PASSWORD`。
 
 **Q：上传图片后访问 404。**
-确认 `file.upload.path` 指向的目录存在（默认 `D:/tao/uploads`），`WebConfig` 已把 `/uploads/**` 映射到该目录。
+确认 `file.upload.path` 指向的目录存在（默认 `D:/tao/uploads`，可用环境变量 `FILE_UPLOAD_PATH` 覆盖；Mac/Linux 请设为本地路径如 `~/tao/uploads`），`WebConfig` 已把 `/uploads/**` 映射到该目录。
 
 **Q：进不了管理后台。**
 当前登录用户 `type` 必须是 1。执行 `UPDATE t_user SET type = 1 WHERE user_name = '你的账号';`
@@ -349,7 +349,7 @@ source D:/tao_full.sql
 
 ## 十一、开发说明
 
-- 日志目录：`D:/tao/logs/tao.log`
-- 上传目录：`D:/tao/uploads/`（按日期分目录，UUID 重命名）
+- 日志目录：`D:/tao/logs/tao.log`（可用环境变量 `LOG_FILE` 覆盖；Mac/Linux 设 `LOG_FILE=~/tao/logs/tao.log`）
+- 上传目录：`D:/tao/uploads/`（按日期分目录，UUID 重命名；可用环境变量 `FILE_UPLOAD_PATH` 覆盖）
 - 静态资源修改后**无需重启**，Spring Boot 每次请求实时读取；Java 代码改动需重启
 - 打包：`mvn clean package -DskipTests`

@@ -73,7 +73,7 @@ tao:
 # ===== 文件上传路径 =====
 file:
   upload:
-    path: D:/tao/uploads
+    path: ${FILE_UPLOAD_PATH:D:/tao/uploads}
     maxsize: 20480000
 
 # ===== 日志配置 =====
@@ -84,4 +84,4 @@ logging:
     console: UTF-8   # 控制台日志编码
     file: UTF-8      # 日志文件编码
   file:
-    name: D:/tao/logs/tao.log  # 日志文件位置（异常堆栈会写在这里，方便排查）
+    name: ${LOG_FILE:D:/tao/logs/tao.log}  # 日志文件位置（异常堆栈会写在这里，方便排查）
